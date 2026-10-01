@@ -1,1 +1,524 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pareto chart builder</title>
+<meta name="description" content="Paste your data and build a Pareto chart in your browser. Nothing is uploaded.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F0F4F5;
+    --surface: #FFFFFF;
+    --ink: #212B32;
+    --muted: #4C6272;
+    --blue: #005EB8;
+    --blue-dark: #003087;
+    --blue-pale: #A9C6E8;
+    --pink: #AE2573;
+    --rule: #D8DDE0;
+    --focus: #FFEB3B;
+    --font: "Atkinson Hyperlegible", "Segoe UI", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--font); }
+
+  header { background: var(--blue); color: #fff; padding: 22px clamp(16px, 4vw, 40px); }
+  header .inner { max-width: 1400px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 1.75rem; line-height: 1.2; }
+  header p { margin: 6px 0 0; max-width: 64ch; }
+
+  main {
+    display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+    gap: 24px; padding: 24px clamp(16px, 4vw, 40px); max-width: 1400px; margin: 0 auto;
+  }
+  @media (max-width: 880px) { main { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 20px; }
+  .panel h2 { font-size: 1.125rem; margin: 0 0 12px; }
+
+  .field { margin-bottom: 16px; }
+  label { font-weight: 700; display: block; margin-bottom: 4px; }
+  .hint { color: var(--muted); font-size: .875rem; margin: 0 0 8px; }
+  textarea, input[type=text], input[type=number] {
+    width: 100%; font: inherit; color: var(--ink); background: #fff;
+    border: 2px solid var(--ink); border-radius: 0; padding: 8px;
+  }
+  textarea { min-height: 260px; resize: vertical; font: 14px/1.45 Consolas, "Courier New", monospace; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; margin-bottom: 10px; cursor: pointer; }
+  .check input { width: 20px; height: 20px; margin: 2px 0 0; flex: none; accent-color: var(--blue); }
+  #detected { font-size: .875rem; color: var(--muted); margin: 6px 0 0; min-height: 1.3em; }
+
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button {
+    font: inherit; font-weight: 700; cursor: pointer; padding: 8px 14px;
+    border: 2px solid var(--blue); background: #fff; color: var(--blue); border-radius: 4px;
+  }
+  button.primary { background: var(--blue); color: #fff; }
+  button:hover { background: var(--blue-dark); border-color: var(--blue-dark); color: #fff; }
+  button:disabled { opacity: .45; cursor: not-allowed; background: #fff; color: var(--blue); border-color: var(--blue); }
+
+  :focus-visible { outline: 4px solid var(--focus); outline-offset: 0; box-shadow: 0 4px 0 var(--ink); }
+  textarea:focus-visible, input:focus-visible { box-shadow: inset 0 0 0 2px var(--ink); }
+
+  .summary { font-size: clamp(1.3rem, 2.6vw, 1.9rem); line-height: 1.25; margin: 0 0 6px; max-width: 34ch; }
+  .summary strong { color: var(--blue); }
+  .focuson { margin: 0 0 18px; color: var(--muted); max-width: 70ch; }
+
+  .chartwrap { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 12px 0; margin-bottom: 14px; overflow-x: auto; }
+  .chartwrap svg { width: 100%; min-width: 560px; height: auto; display: block; }
+
+  .empty { padding: 48px 8px; text-align: center; color: var(--muted); }
+  .empty p { margin: 0 0 14px; }
+
+  #status { font-size: .875rem; color: var(--muted); }
+
+  .tablewrap { overflow-x: auto; margin-top: 20px; }
+  table { border-collapse: collapse; width: 100%; font-size: .9375rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+  th { border-bottom: 2px solid var(--ink); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.cutrow td { border-bottom: 2px dashed var(--muted); }
+  .sw { display: inline-block; width: 12px; height: 12px; margin-right: 8px; vertical-align: -1px; }
+
+  footer { max-width: 1400px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px) 32px; color: var(--muted); font-size: .875rem; }
+  footer p { max-width: 80ch; }
+
+  @media (prefers-reduced-motion: no-preference) { button { transition: background .15s, color .15s; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <h1>Pareto chart builder</h1>
+    <p>Paste your data and see which few causes make up most of the problem. Everything runs in your browser — your data is never uploaded.</p>
+  </div>
+</header>
+
+<main>
+  <section class="panel" aria-labelledby="data-h">
+    <h2 id="data-h">Your data</h2>
+
+    <div class="field">
+      <label for="data">Paste from Excel or a CSV</label>
+      <p class="hint">Either two columns (category and count), or one column with a row for every occurrence — repeats are counted for you.</p>
+      <textarea id="data" spellcheck="false" placeholder="Late patient arrival&#9;48&#10;Surgeon unavailable&#9;31&#10;Anaesthetic delay&#9;22"></textarea>
+      <p id="detected" aria-live="polite"></p>
+    </div>
+
+    <label class="check"><input type="checkbox" id="hasHeader"> First row is column headings</label>
+
+    <div class="btns" style="margin-bottom:22px">
+      <button type="button" id="exampleBtn">Load example</button>
+      <button type="button" id="clearBtn">Clear</button>
+    </div>
+
+    <h2>Chart settings</h2>
+    <div class="field">
+      <label for="title">Chart title</label>
+      <input type="text" id="title" placeholder="e.g. Reasons for theatre start delays">
+    </div>
+    <div class="field">
+      <label for="yLabel">Count axis label</label>
+      <input type="text" id="yLabel" placeholder="Count">
+    </div>
+    <div class="pair">
+      <div class="field">
+        <label for="cutoff">Cut-off %</label>
+        <input type="number" id="cutoff" value="80" min="50" max="99" step="1">
+      </div>
+      <div class="field">
+        <label for="groupAfter">Group after</label>
+        <input type="number" id="groupAfter" value="0" min="0" step="1" aria-describedby="groupHint">
+      </div>
+    </div>
+    <p class="hint" id="groupHint" style="margin-top:-8px">Group after: keep this many categories and put the rest into "Other". Use 0 to show them all.</p>
+    <label class="check"><input type="checkbox" id="aligned" checked> Scale count axis to the total, so both axes line up</label>
+    <label class="check"><input type="checkbox" id="showLabels" checked> Show data labels</label>
+  </section>
+
+  <section class="panel" aria-labelledby="result-h">
+    <h2 id="result-h" class="visually-hidden" style="position:absolute;left:-9999px">Result</h2>
+    <div id="result">
+      <div class="empty">
+        <p>Paste data on the left to build your chart.</p>
+        <button type="button" class="primary" id="exampleBtn2">Try the example</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>How to read it: bars show each category's count, largest first. The line shows the running total as a percentage. Categories up to the cut-off line are the "vital few" — the places where improvement effort is likely to have most effect.</p>
+</footer>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const els = {
+    data: $('data'), hasHeader: $('hasHeader'), detected: $('detected'), title: $('title'),
+    yLabel: $('yLabel'), cutoff: $('cutoff'), groupAfter: $('groupAfter'),
+    aligned: $('aligned'), showLabels: $('showLabels'), result: $('result')
+  };
+  const COLORS = { vital: '#005EB8', rest: '#A9C6E8', line: '#AE2573', ink: '#212B32', muted: '#4C6272', grid: '#E3E8EB', cut: '#4C6272' };
+  const FONT = 'Atkinson Hyperlegible, Segoe UI, Arial, sans-serif';
+  const nf = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 2 });
+  const pct = v => (Math.round(v * 10) / 10).toFixed(1);
+  const ROW = /^(.*?)\s*[\t,;]\s*"?(-?\d[\d,]*(?:\.\d+)?)"?\s*$/;
+
+  let headerTouched = false;
+  let current = null;
+  let timer = null;
+
+  const EXAMPLE = [
+    'Reason\tDelays',
+    'Late patient arrival\t48',
+    'Surgeon unavailable\t31',
+    'Anaesthetic delay\t22',
+    'Equipment missing\t15',
+    'Consent incomplete\t11',
+    'Bed unavailable\t9',
+    'Porter delay\t6',
+    'Pre-op checks incomplete\t5',
+    'Theatre list changed\t3'
+  ].join('\n');
+
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const clean = s => s.trim().replace(/^"(.*)"$/, '$1').trim();
+  const trunc = (s, n) => s.length > n ? s.slice(0, n - 1) + '…' : s;
+  const slug = s => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'pareto-chart';
+
+  function analyse(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+    if (!lines.length) return null;
+    const rest = lines.slice(1);
+    const all = lines.filter(l => ROW.test(l)).length;
+    const restM = rest.filter(l => ROW.test(l)).length;
+    const counts = all > 0 && (all >= lines.length * 0.6 || (rest.length > 0 && restM >= rest.length * 0.6));
+    const mode = counts ? 'counts' : 'tally';
+    return { lines, mode, headerGuess: mode === 'counts' && !ROW.test(lines[0]) };
+  }
+
+  function parse(text, hasHeader) {
+    const a = analyse(text);
+    if (!a) return null;
+    const { lines, mode } = a;
+    let catLabel = 'Category', valLabel = '', data = lines;
+    if (hasHeader) {
+      data = lines.slice(1);
+      if (mode === 'counts') {
+        const parts = lines[0].split(/\t|,|;/).map(clean);
+        catLabel = parts[0] || catLabel;
+        valLabel = parts[1] || '';
+      } else {
+        catLabel = clean(lines[0].split('\t')[0]) || catLabel;
+      }
+    }
+    const map = new Map();
+    let skipped = 0;
+    for (const line of data) {
+      let name, val;
+      if (mode === 'counts') {
+        const m = line.match(ROW);
+        if (!m) { skipped++; continue; }
+        name = clean(m[1]);
+        val = parseFloat(m[2].replace(/,/g, ''));
+        if (!(val > 0)) { skipped++; continue; }
+      } else {
+        name = clean(line.split('\t')[0]);
+        val = 1;
+      }
+      if (!name) name = '(blank)';
+      const key = name.toLowerCase().replace(/\s+/g, ' ');
+      const e = map.get(key);
+      if (e) e.value += val; else map.set(key, { name, value: val });
+    }
+    return { mode, catLabel, valLabel, skipped, items: [...map.values()] };
+  }
+
+  function compute(items, groupAfter, cutoff) {
+    const isOther = d => /^other$/i.test(d.name);
+    const byVal = (a, b) => b.value - a.value || a.name.localeCompare(b.name);
+    let main = items.filter(d => !isOther(d)).map(d => ({ ...d })).sort(byVal);
+    let others = items.filter(isOther).map(d => ({ ...d, other: true }));
+    if (groupAfter > 0 && main.length > groupAfter + 1) {
+      const rest = main.slice(groupAfter);
+      main = main.slice(0, groupAfter);
+      const restTotal = rest.reduce((t, d) => t + d.value, 0) + others.reduce((t, d) => t + d.value, 0);
+      const n = rest.length + others.length;
+      others = [{ name: 'Other (' + n + ' categories)', value: restTotal, other: true }];
+    }
+    const rows = main.concat(others);
+    const total = rows.reduce((t, d) => t + d.value, 0);
+    let cum = 0;
+    rows.forEach(d => { cum += d.value; d.pct = d.value / total * 100; d.cum = cum / total * 100; });
+    let vital = rows.findIndex(d => d.cum >= cutoff - 1e-9) + 1;
+    if (vital <= 0) vital = rows.length;
+    rows.forEach((d, i) => { d.vital = i < vital; });
+    return { rows, total, vital };
+  }
+
+  function niceStep(x) {
+    const e = Math.floor(Math.log10(x)), f = x / Math.pow(10, e);
+    const nfac = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10;
+    return nfac * Math.pow(10, e);
+  }
+
+  function renderSVG(res, o) {
+    const { rows, total } = res;
+    const n = rows.length;
+    const W = 960, ML = 76, MR = 76;
+    const plotW = W - ML - MR, band = plotW / n, plotH = 340;
+    const labels = rows.map(d => trunc(d.name, 28));
+    const maxLen = Math.max(...labels.map(l => l.length));
+    const charW = 7;
+    const rotate = maxLen * charW > band - 6;
+    const labelH = rotate ? maxLen * charW * Math.sin(40 * Math.PI / 180) + 22 : 28;
+    const MT = (o.title ? 58 : 18) + 30;
+    const MB = labelH + 40;
+    const H = Math.round(MT + plotH + MB);
+    const base = MT + plotH;
+
+    let leftMax, leftTicks = [];
+    if (o.aligned) {
+      leftMax = total;
+      for (let k = 0; k <= 5; k++) leftTicks.push(total * k / 5);
+    } else {
+      const maxV = rows[0] ? Math.max(...rows.map(d => d.value)) : 1;
+      const step = niceStep(maxV / 5);
+      leftMax = Math.ceil(maxV / step) * step;
+      for (let v = 0; v <= leftMax + 1e-9; v += step) leftTicks.push(v);
+    }
+    const yL = v => base - v / leftMax * plotH;
+    const yR = p => base - p / 100 * plotH;
+    const tick = v => o.aligned && total >= 50 ? nf.format(Math.round(v)) : nf.format(Math.round(v * 10) / 10);
+    const halo = 'paint-order="stroke" stroke="#fff" stroke-width="3" stroke-linejoin="round"';
+
+    const s = [];
+    s.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(o.aria)}" font-family="${FONT}">`);
+    s.push(`<rect width="${W}" height="${H}" fill="#ffffff"/>`);
+    if (o.title) s.push(`<text x="${ML}" y="34" font-size="22" font-weight="700" fill="${COLORS.ink}">${esc(o.title)}</text>`);
+
+    // legend
+    const ly = MT - 22;
+    let lx = ML;
+    const legend = [['rect', COLORS.vital, 'Vital few'], ['rect', COLORS.rest, 'Remaining'], ['line', COLORS.line, 'Cumulative %'], ['dash', COLORS.cut, o.cutoff + '% cut-off']];
+    legend.forEach(([t, c, txt]) => {
+      if (t === 'rect') s.push(`<rect x="${lx}" y="${ly - 10}" width="14" height="14" fill="${c}"/>`);
+      else if (t === 'line') s.push(`<line x1="${lx - 2}" y1="${ly - 3}" x2="${lx + 16}" y2="${ly - 3}" stroke="${c}" stroke-width="2.5"/><circle cx="${lx + 7}" cy="${ly - 3}" r="3.5" fill="${c}"/>`);
+      else s.push(`<line x1="${lx - 2}" y1="${ly - 3}" x2="${lx + 16}" y2="${ly - 3}" stroke="${c}" stroke-width="1.5" stroke-dasharray="5 4"/>`);
+      s.push(`<text x="${lx + 22}" y="${ly + 2}" font-size="13" fill="${COLORS.ink}">${esc(txt)}</text>`);
+      lx += 22 + txt.length * 7.2 + 26;
+    });
+
+    // grid + left ticks
+    leftTicks.forEach(v => {
+      const y = yL(v);
+      s.push(`<line x1="${ML}" y1="${y}" x2="${ML + plotW}" y2="${y}" stroke="${COLORS.grid}" stroke-width="1"/>`);
+      s.push(`<text x="${ML - 8}" y="${y + 4}" font-size="12" text-anchor="end" fill="${COLORS.muted}">${tick(v)}</text>`);
+    });
+    // right ticks
+    for (let p = 0; p <= 100; p += 20) {
+      s.push(`<text x="${ML + plotW + 8}" y="${yR(p) + 4}" font-size="12" fill="${COLORS.muted}">${p}%</text>`);
+    }
+
+    // bars
+    rows.forEach((d, i) => {
+      const bw = band * 0.76, x = ML + i * band + (band - bw) / 2, y = yL(d.value), h = base - y;
+      const fill = d.vital ? COLORS.vital : COLORS.rest;
+      s.push(`<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${fill}"><title>${esc(d.name)}: ${nf.format(d.value)} (${pct(d.pct)}%)</title></rect>`);
+      if (o.showLabels && band >= 20) {
+        const fs = band < 34 ? 10 : 12;
+        if (h > 22) s.push(`<text x="${x + bw / 2}" y="${y + 16}" font-size="${fs}" font-weight="700" text-anchor="middle" fill="${d.vital ? '#ffffff' : COLORS.ink}">${nf.format(d.value)}</text>`);
+        else s.push(`<text x="${x + bw / 2}" y="${y - 5}" font-size="${fs}" font-weight="700" text-anchor="middle" fill="${COLORS.ink}" ${halo}>${nf.format(d.value)}</text>`);
+      }
+    });
+
+    // cut-off line
+    const cy = yR(o.cutoff);
+    s.push(`<line x1="${ML}" y1="${cy}" x2="${ML + plotW}" y2="${cy}" stroke="${COLORS.cut}" stroke-width="1.5" stroke-dasharray="6 5"/>`);
+
+    // cumulative line
+    const pts = rows.map((d, i) => [ML + i * band + band / 2, yR(d.cum)]);
+    s.push(`<polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="${COLORS.line}" stroke-width="2.5" stroke-linejoin="round"/>`);
+    pts.forEach(([x, y], i) => {
+      s.push(`<circle cx="${x}" cy="${y}" r="4" fill="${COLORS.line}" stroke="#fff" stroke-width="1.5"><title>Cumulative: ${pct(rows[i].cum)}%</title></circle>`);
+      if (o.showLabels && band >= 30) s.push(`<text x="${x}" y="${y - 10}" font-size="11" text-anchor="middle" fill="${COLORS.line}" font-weight="700" ${halo}>${pct(rows[i].cum)}%</text>`);
+    });
+
+    // axes
+    s.push(`<line x1="${ML}" y1="${MT}" x2="${ML}" y2="${base}" stroke="${COLORS.ink}" stroke-width="1.5"/>`);
+    s.push(`<line x1="${ML + plotW}" y1="${MT}" x2="${ML + plotW}" y2="${base}" stroke="${COLORS.ink}" stroke-width="1.5"/>`);
+    s.push(`<line x1="${ML}" y1="${base}" x2="${ML + plotW}" y2="${base}" stroke="${COLORS.ink}" stroke-width="1.5"/>`);
+
+    // category labels
+    labels.forEach((l, i) => {
+      const x = ML + i * band + band / 2;
+      if (rotate) s.push(`<text x="${x}" y="${base + 16}" font-size="13" text-anchor="end" fill="${COLORS.ink}" transform="rotate(-40 ${x} ${base + 16})"><title>${esc(rows[i].name)}</title>${esc(l)}</text>`);
+      else s.push(`<text x="${x}" y="${base + 20}" font-size="13" text-anchor="middle" fill="${COLORS.ink}"><title>${esc(rows[i].name)}</title>${esc(l)}</text>`);
+    });
+
+    // axis titles
+    s.push(`<text transform="translate(20 ${MT + plotH / 2}) rotate(-90)" font-size="13" font-weight="700" text-anchor="middle" fill="${COLORS.ink}">${esc(o.yLabel)}</text>`);
+    s.push(`<text transform="translate(${W - 16} ${MT + plotH / 2}) rotate(90)" font-size="13" font-weight="700" text-anchor="middle" fill="${COLORS.ink}">Cumulative %</text>`);
+    s.push(`<text x="${ML + plotW / 2}" y="${H - 12}" font-size="13" font-weight="700" text-anchor="middle" fill="${COLORS.ink}">${esc(o.xLabel)}</text>`);
+    s.push('</svg>');
+    return s.join('');
+  }
+
+  function joinNames(names) {
+    if (names.length === 1) return names[0];
+    return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+  }
+
+  function update() {
+    const text = els.data.value;
+    const a = analyse(text);
+    if (a && !headerTouched) els.hasHeader.checked = a.headerGuess;
+    const p = parse(text, els.hasHeader.checked);
+
+    if (!p) { els.detected.textContent = ''; current = null; return renderEmpty('Paste data on the left to build your chart.'); }
+
+    let note = p.mode === 'counts' ? 'Reading this as categories with counts.' : 'Reading this as a list of occurrences — each row counts as one.';
+    if (p.skipped) note += ` ${p.skipped} row${p.skipped > 1 ? 's' : ''} skipped (no positive number found).`;
+    els.detected.textContent = note;
+
+    if (p.items.length < 2) { current = null; return renderEmpty('Add at least two different categories to build a Pareto chart.'); }
+
+    let cutoff = parseFloat(els.cutoff.value);
+    if (!(cutoff > 0 && cutoff < 100)) cutoff = 80;
+    const groupAfter = Math.max(0, parseInt(els.groupAfter.value, 10) || 0);
+    const res = compute(p.items, groupAfter, cutoff);
+    const title = els.title.value.trim();
+    const yLabel = els.yLabel.value.trim() || p.valLabel || (p.mode === 'tally' ? 'Occurrences' : 'Count');
+    els.yLabel.placeholder = p.valLabel || (p.mode === 'tally' ? 'Occurrences' : 'Count');
+    const n = res.rows.length, k = res.vital, reach = res.rows[k - 1].cum;
+    const sentence = `${k} of ${n} categories account for ${pct(reach)}% of the total (${nf.format(res.total)}).`;
+
+    const svg = renderSVG(res, {
+      title, yLabel, xLabel: p.catLabel, cutoff,
+      aligned: els.aligned.checked, showLabels: els.showLabels.checked,
+      aria: (title ? title + '. ' : '') + 'Pareto chart. ' + sentence
+    });
+
+    const focusNames = res.rows.slice(0, k).filter(d => !d.other).map(d => d.name);
+    current = { res, title, yLabel, catLabel: p.catLabel };
+
+    els.result.innerHTML = `
+      <p class="summary"><strong>${k} of ${n}</strong> categories account for <strong>${pct(reach)}%</strong> of the total (${nf.format(res.total)}).</p>
+      ${focusNames.length ? `<p class="focuson">Vital few: ${esc(joinNames(focusNames))}.</p>` : '<p class="focuson"></p>'}
+      <div class="chartwrap" id="chart">${svg}</div>
+      <div class="btns">
+        <button type="button" class="primary" data-act="png">Download PNG</button>
+        <button type="button" data-act="svg">Download SVG</button>
+        <button type="button" data-act="copyimg">Copy chart</button>
+        <button type="button" data-act="csv">Download table (CSV)</button>
+        <button type="button" data-act="copytable">Copy table</button>
+        <span id="status" role="status" aria-live="polite"></span>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th class="num">Rank</th><th>${esc(p.catLabel)}</th><th class="num">${esc(yLabel)}</th><th class="num">% of total</th><th class="num">Cumulative %</th></tr></thead>
+          <tbody>${res.rows.map((d, i) => `<tr${i === k - 1 && k < n ? ' class="cutrow"' : ''}>
+            <td class="num">${i + 1}</td>
+            <td><span class="sw" style="background:${d.vital ? COLORS.vital : COLORS.rest}" aria-hidden="true"></span>${esc(d.name)}${d.vital ? '<span style="position:absolute;left:-9999px"> (vital few)</span>' : ''}</td>
+            <td class="num">${nf.format(d.value)}</td>
+            <td class="num">${pct(d.pct)}%</td>
+            <td class="num">${pct(d.cum)}%</td></tr>`).join('')}
+          </tbody>
+          <tfoot><tr><th></th><th>Total</th><th class="num">${nf.format(res.total)}</th><th class="num">100.0%</th><th></th></tr></tfoot>
+        </table>
+      </div>`;
+  }
+
+  function renderEmpty(msg) {
+    els.result.innerHTML = `<div class="empty"><p>${esc(msg)}</p><button type="button" class="primary" data-act="example">Try the example</button></div>`;
+  }
+
+  function schedule() { clearTimeout(timer); timer = setTimeout(update, 180); }
+
+  // ---- exports ----
+  function svgEl() { return document.querySelector('#chart svg'); }
+  function fileName() { return slug(current && current.title); }
+  function downloadBlob(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function status(msg) { const st = $('status'); if (st) { st.textContent = msg; setTimeout(() => { if (st.textContent === msg) st.textContent = ''; }, 3000); } }
+
+  function toPNG(cb) {
+    const svg = svgEl(); if (!svg) return;
+    const vb = svg.viewBox.baseVal, scale = 2;
+    const str = new XMLSerializer().serializeToString(svg);
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = vb.width * scale; c.height = vb.height * scale;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(cb, 'image/png');
+    };
+    img.onerror = () => status('Could not create the image.');
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(str);
+  }
+
+  function tableRows() {
+    const { res, yLabel, catLabel } = current;
+    const head = ['Rank', catLabel, yLabel, '% of total', 'Cumulative %', 'Vital few'];
+    const body = res.rows.map((d, i) => [i + 1, d.name, d.value, pct(d.pct), pct(d.cum), d.vital ? 'Yes' : 'No']);
+    return [head].concat(body);
+  }
+  const csvCell = v => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
+
+  async function copyText(t) {
+    try { await navigator.clipboard.writeText(t); return true; }
+    catch (e) {
+      const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand('copy'); ta.remove(); return ok;
+    }
+  }
+
+  function act(a) {
+    if (a === 'example') return loadExample();
+    if (!current) return;
+    if (a === 'png') toPNG(b => { downloadBlob(b, fileName() + '.png'); status('PNG downloaded.'); });
+    if (a === 'svg') { downloadBlob(new Blob([new XMLSerializer().serializeToString(svgEl())], { type: 'image/svg+xml' }), fileName() + '.svg'); status('SVG downloaded.'); }
+    if (a === 'copyimg') {
+      if (!(navigator.clipboard && window.ClipboardItem)) return status('Your browser can’t copy images — use Download PNG.');
+      toPNG(async b => {
+        try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]); status('Chart copied — paste it into PowerPoint or Word.'); }
+        catch (e) { status('Copy was blocked — use Download PNG.'); }
+      });
+    }
+    if (a === 'csv') { downloadBlob(new Blob([tableRows().map(r => r.map(csvCell).join(',')).join('\r\n')], { type: 'text/csv' }), fileName() + '.csv'); status('Table downloaded.'); }
+    if (a === 'copytable') copyText(tableRows().map(r => r.join('\t')).join('\n')).then(ok => status(ok ? 'Table copied — paste it into Excel.' : 'Copy was blocked.'));
+  }
+
+  function loadExample() {
+    els.data.value = EXAMPLE;
+    els.title.value = 'Reasons for theatre start delays';
+    headerTouched = false;
+    update();
+  }
+
+  // ---- events ----
+  els.data.addEventListener('input', schedule);
+  els.hasHeader.addEventListener('change', () => { headerTouched = true; update(); });
+  ['title', 'yLabel', 'cutoff', 'groupAfter'].forEach(id => els[id].addEventListener('input', schedule));
+  ['aligned', 'showLabels'].forEach(id => els[id].addEventListener('change', update));
+  $('exampleBtn').addEventListener('click', loadExample);
+  $('exampleBtn2').addEventListener('click', loadExample);
+  $('clearBtn').addEventListener('click', () => { els.data.value = ''; headerTouched = false; els.hasHeader.checked = false; update(); els.data.focus(); });
+  els.result.addEventListener('click', e => { const b = e.target.closest('button[data-act]'); if (b) act(b.dataset.act); });
+})();
+</script>
+</body>
+</html>
 
