@@ -85,6 +85,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .npsbar{display:flex;height:.9rem;border-radius:99px;overflow:hidden;background:var(--bg);margin:.6rem 0 .4rem}
 .npsbar i{display:block}
 @media (max-width:640px){.nps{grid-template-columns:repeat(6,1fr)}}
+.xbtn{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border:2px solid transparent;border-radius:4px;background:transparent;color:var(--muted);cursor:pointer}
+.xbtn:hover{color:var(--danger);border-color:var(--danger);background:var(--surface)}
 .pulse-row{display:flex;flex-wrap:wrap;gap:.75rem 1rem;align-items:center}
 .pdsa-add{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:end}
 .pdsa{list-style:none;margin:.9rem 0 0;padding:0;display:grid;gap:.5rem;counter-reset:c}
@@ -727,12 +729,14 @@ function miniRail(p){
   return `<span class="mini" aria-label="${esc(stageLabel(p))}">${STAGES.map((s,i)=>`<b class="${p.closed||i<p.stage?"on":(i===p.stage?"cur":"")}">${s.letter}</b>`).join("")}</span>`;
 }
 function rows(list,mine){
-  if(!list.length) return `<tbody><tr><td colspan="6"><p class="empty">No projects match. Try a different search or stage.</p></td></tr></tbody>`;
-  return `<thead><tr><th>Project</th><th>Lifecycle</th><th>Stage</th><th>Team</th><th>Sites</th><th>${mine?"Last change":"Lead"}</th></tr></thead><tbody>${
+  if(!list.length) return mine
+    ? `<tbody><tr><td><p class="empty">You have no projects yet. Use Start a new project to log your first one.</p></td></tr></tbody>`
+    : `<tbody><tr><td colspan="6"><p class="empty">No projects match. Try a different search or stage.</p></td></tr></tbody>`;
+  return `<thead><tr><th>Project</th><th>Lifecycle</th><th>Stage</th><th>Team</th><th>Sites</th><th>${mine?"Last change":"Lead"}</th>${mine?'<th><span style="position:absolute;left:-9999px">Actions</span></th>':""}</tr></thead><tbody>${
     list.map(p=>{const d=p.data,last=p.history[p.history.length-1];
       return `<tr><td><a class="t" href="#project" data-open="${p.id}">${esc(d.title||"Untitled project")}</a><div class="hint" style="margin:0">${esc((d.expectedBenefits||"").slice(0,90))}</div></td>
       <td>${miniRail(p)}</td><td>${esc(stageLabel(p))}</td><td>${esc(d.group||"")}</td><td>${esc((d.sites||[]).join(", "))}</td>
-      <td>${mine?fmt(last.date):esc(d.leadName||"")}</td></tr>`}).join("")}</tbody>`;
+      <td>${mine?fmt(last.date):esc(d.leadName||"")}</td>${mine?`<td style="text-align:right"><button type="button" class="xbtn" data-del="${p.id}" aria-label="Delete ${esc(d.title||"Untitled project")}" title="Delete project"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></td>`:""}</tr>`}).join("")}</tbody>`;
 }
 function renderMine(){ document.getElementById("mineTable").innerHTML=rows(S.projects.filter(p=>p.owner===ME),true); }
 function renderRepo(){
@@ -803,6 +807,32 @@ function renderFbAside(){
    </div>
    <div class="card"><h3>How the score works</h3><p style="margin:0;font-size:.93rem">NPS is the percentage of promoters minus the percentage of detractors, giving a score from −100 to +100.</p></div>`;
 }
+
+/* ---------- Delete project ---------- */
+function confirmDelete(id){
+  const p=S.projects.find(x=>x.id===id); if(!p) return;
+  const title=p.data.title||"Untitled project";
+  dlg.innerHTML=`<div class="dlg-head"><h2 id="dlgTitle">Delete this project?</h2></div>
+    <div class="dlg-body"><p style="margin:0 0 .5rem"><strong>${esc(title)}</strong></p>
+    <p style="margin:0;color:var(--muted)">This removes the project, its stage history, PDSA cycles, updates and documents from the tracker. It can't be undone.</p></div>
+    <div class="dlg-foot"><button type="button" class="btn secondary" data-act="dlgCancel">Keep project</button><button type="button" class="btn" style="background:var(--danger);box-shadow:none" data-act="dlgDelete" data-id="${id}">Delete project</button></div>`;
+  dlg.showModal();
+  dlg.querySelector('[data-act="dlgCancel"]').focus();
+}
+dlg.addEventListener("click",e=>{
+  const b=e.target.closest('[data-act="dlgDelete"]'); if(!b) return;
+  const id=b.dataset.id, t=S.projects.find(x=>x.id===id)?.data.title||"Untitled project";
+  S.projects=S.projects.filter(x=>x.id!==id);
+  if(S.current===id){
+    const next=S.projects.find(x=>x.owner===ME)||S.projects[0];
+    if(next) S.current=next.id; else { const n=blankProject(); S.projects.push(n); S.current=n.id; }
+    viewStage=cur().closed?5:cur().stage;
+  }
+  save(); dlg.close(); renderMine(); toast("Deleted: "+t);
+});
+document.getElementById("mineTable").addEventListener("click",e=>{
+  const b=e.target.closest("[data-del]"); if(b) confirmDelete(b.dataset.del);
+});
 
 /* ---------- Routing ---------- */
 function route(){
