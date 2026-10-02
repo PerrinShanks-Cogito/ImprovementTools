@@ -228,6 +228,8 @@ dialog::backdrop{background:rgba(0,30,60,.55)}
       <strong>Get support</strong>
       <a href="https://m365.cloud.microsoft/chat/?titleId=T_9a8ef1bb-12ee-5134-a332-f2a26e2f1bd9&source=embedded-builder" target="_blank" rel="noopener">QI Coach chatbot</a>
       <a href="https://nhs.sharepoint.com/:u:/r/sites/msteams_de9171/SitePages/Coaching,-Mentoring-%26-QI-Clinics.aspx?d=w388a701be9e940038a5ed1ab42b9b192&amp;csf=1&amp;web=1&amp;e=6gO0oF" target="_blank" rel="noopener">Book a QI Clinic</a>
+      <a href="https://coh.gstt.nhs.uk/course/view.php?id=3199" target="_blank" rel="noopener">Book training</a>
+      <a href="https://teams.microsoft.com/l/channel/19%3AtqDE8DYvOERF7Q7JAJyW4WuaJFD6AmLJ07wypT9dVks1%40thread.tacv2/Improvement%20Community%20Hub?groupId=1bf22369-4401-488f-8994-68e3d2340c12&amp;tenantId=37c354b2-85b0-47f5-b222-07b48d774ee3" target="_blank" rel="noopener">Ask the Improvement Community</a>
       <details class="tools" id="toolsMenu"><summary>QI charting tools</summary><div class="menu"><ul class="toollist" id="toolsList"></ul><p class="menu-note">Tools still in development or ideation are listed so you know what is coming.</p></div></details>
     </div>
   </div>
@@ -554,7 +556,9 @@ function renderAside(){
    <div class="card"><h3>Need a hand?</h3><ul class="helplinks">
      <li><a href="${LINKS.chatbot}" target="_blank" rel="noopener">Ask the QI Coach chatbot</a></li>
      <li><a href="https://nhs.sharepoint.com/:u:/r/sites/msteams_de9171/SitePages/Coaching,-Mentoring-%26-QI-Clinics.aspx?d=w388a701be9e940038a5ed1ab42b9b192&amp;csf=1&amp;web=1&amp;e=6gO0oF" target="_blank" rel="noopener">Book a QI Clinic</a></li>
-</ul></div>
+
+     <li><a href="https://coh.gstt.nhs.uk/course/view.php?id=3199" target="_blank" rel="noopener">Book training with the CITI Academy</a></li>
+     <li><a href="https://teams.microsoft.com/l/channel/19%3AtqDE8DYvOERF7Q7JAJyW4WuaJFD6AmLJ07wypT9dVks1%40thread.tacv2/Improvement%20Community%20Hub?groupId=1bf22369-4401-488f-8994-68e3d2340c12&amp;tenantId=37c354b2-85b0-47f5-b222-07b48d774ee3" target="_blank" rel="noopener">Ask a question in the Improvement Community Hub</a></li></ul></div>
    <div class="card"><h3>QI charting tools</h3><ul class="toollist">${TOOLS.filter(t=>t.url).map(toolItem).join("")}</ul></div>`;
 }
 
