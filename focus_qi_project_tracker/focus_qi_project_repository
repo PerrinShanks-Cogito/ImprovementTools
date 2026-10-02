@@ -59,6 +59,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .toollist li+li{border-top:1px solid var(--line)}
 .toollist a{color:var(--blue);font-weight:600}
 .toollist .off{color:var(--muted)}
+.supportlist li{flex-direction:column;align-items:flex-start;gap:.1rem}
+.menu-desc{font-size:.85rem;color:var(--muted)}
+.support-inner{gap:.25rem 1.75rem}
 .tag{flex:none;font-size:.78rem;font-weight:700;padding:.1rem .5rem;border-radius:99px;white-space:nowrap}
 .tag.beta{background:var(--green-bg);color:var(--green)}
 .tag.alpha{background:var(--blue-bg);color:var(--navy)}
@@ -67,6 +70,21 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.dev{background:#3A2E10;color:#FFD27A}}
 :root[data-theme="dark"] .tag.dev{background:#3A2E10;color:#FFD27A}
 .menu-note{font-size:.82rem;color:var(--muted);margin:.4rem .6rem .2rem}
+.fb{max-width:760px}
+.nps{display:grid;grid-template-columns:repeat(11,1fr);gap:.35rem;margin-top:.5rem}
+.nps label{cursor:pointer}
+.nps input{position:absolute;opacity:0;pointer-events:none}
+.nps span{display:flex;align-items:center;justify-content:center;height:2.9rem;border:2px solid var(--muted);border-radius:4px;font-weight:700;font-size:1.05rem}
+.nps label:hover span{border-color:var(--blue)}
+.nps input:checked+span{background:var(--blue);border-color:var(--blue);color:#fff}
+.nps input:focus-visible+span{box-shadow:0 0 0 3px var(--yellow)}
+.nps-ends{display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted);margin-top:.35rem}
+.thanks{border-left:5px solid var(--green);background:var(--green-bg);padding:1rem 1.2rem;border-radius:0 4px 4px 0;margin-bottom:1.5rem}
+.thanks h2{margin:0 0 .25rem;font-size:1.2rem;color:var(--green)}
+.thanks p{margin:0}
+.npsbar{display:flex;height:.9rem;border-radius:99px;overflow:hidden;background:var(--bg);margin:.6rem 0 .4rem}
+.npsbar i{display:block}
+@media (max-width:640px){.nps{grid-template-columns:repeat(6,1fr)}}
 .pulse-row{display:flex;flex-wrap:wrap;gap:.75rem 1rem;align-items:center}
 .pdsa-add{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:end}
 .pdsa{list-style:none;margin:.9rem 0 0;padding:0;display:grid;gap:.5rem;counter-reset:c}
@@ -220,16 +238,13 @@ dialog::backdrop{background:rgba(0,30,60,.55)}
         <a href="#project" data-nav="project">Current project</a>
         <a href="#repo" data-nav="repo">Project repository</a>
         <a href="#new" id="newProject">Start a new project</a>
+        <a href="#feedback" data-nav="feedback">Feedback</a>
       </nav>
     </div>
   </div>
   <div class="support">
     <div class="support-inner">
-      <strong>Get support</strong>
-      <a href="https://m365.cloud.microsoft/chat/?titleId=T_9a8ef1bb-12ee-5134-a332-f2a26e2f1bd9&source=embedded-builder" target="_blank" rel="noopener">QI Coach chatbot</a>
-      <a href="https://nhs.sharepoint.com/:u:/r/sites/msteams_de9171/SitePages/Coaching,-Mentoring-%26-QI-Clinics.aspx?d=w388a701be9e940038a5ed1ab42b9b192&amp;csf=1&amp;web=1&amp;e=6gO0oF" target="_blank" rel="noopener">Book a QI Clinic</a>
-      <a href="https://coh.gstt.nhs.uk/course/view.php?id=3199" target="_blank" rel="noopener">Book training</a>
-      <a href="https://teams.microsoft.com/l/channel/19%3AtqDE8DYvOERF7Q7JAJyW4WuaJFD6AmLJ07wypT9dVks1%40thread.tacv2/Improvement%20Community%20Hub?groupId=1bf22369-4401-488f-8994-68e3d2340c12&amp;tenantId=37c354b2-85b0-47f5-b222-07b48d774ee3" target="_blank" rel="noopener">Ask the Improvement Community</a>
+      <details class="tools" id="supportMenu"><summary>Get support</summary><div class="menu"><ul class="toollist supportlist"><li><a href="https://m365.cloud.microsoft/chat/?titleId=T_9a8ef1bb-12ee-5134-a332-f2a26e2f1bd9&source=embedded-builder" target="_blank" rel="noopener">QI Coach chatbot</a><span class="menu-desc">Talk through your idea or next step</span></li><li><a href="https://nhs.sharepoint.com/:u:/r/sites/msteams_de9171/SitePages/Coaching,-Mentoring-%26-QI-Clinics.aspx?d=w388a701be9e940038a5ed1ab42b9b192&amp;csf=1&amp;web=1&amp;e=6gO0oF" target="_blank" rel="noopener">Book a QI Clinic</a><span class="menu-desc">One-to-one time with an improvement advisor</span></li><li><a href="https://coh.gstt.nhs.uk/course/view.php?id=3199" target="_blank" rel="noopener">Book training</a><span class="menu-desc">QI courses from the CITI Academy</span></li><li><a href="https://teams.microsoft.com/l/channel/19%3AtqDE8DYvOERF7Q7JAJyW4WuaJFD6AmLJ07wypT9dVks1%40thread.tacv2/Improvement%20Community%20Hub?groupId=1bf22369-4401-488f-8994-68e3d2340c12&amp;tenantId=37c354b2-85b0-47f5-b222-07b48d774ee3" target="_blank" rel="noopener">Ask the Improvement Community</a><span class="menu-desc">Post a question in the Teams hub</span></li></ul></div></details>
       <details class="tools" id="toolsMenu"><summary>QI charting tools</summary><div class="menu"><ul class="toollist" id="toolsList"></ul><p class="menu-note">Tools still in development or ideation are listed so you know what is coming.</p></div></details>
     </div>
   </div>
@@ -264,6 +279,14 @@ dialog::backdrop{background:rgba(0,30,60,.55)}
   </section>
 
   <!-- Repository -->
+  <section class="view" id="view-feedback" hidden aria-labelledby="fbTitle">
+    <div class="listhead"><div><h1 id="fbTitle">Feedback</h1><p>Tell us how the FOCUS tracker is working for you. It takes under a minute.</p></div></div>
+    <div class="work">
+      <div class="panel fb" id="fbPanel"></div>
+      <aside id="fbAside"></aside>
+    </div>
+  </section>
+
   <section class="view" id="view-repo" hidden aria-labelledby="repoTitle">
     <div class="listhead">
       <div><h1 id="repoTitle">Project repository</h1><p>Every improvement project registered across the Trust.</p></div>
@@ -277,6 +300,7 @@ dialog::backdrop{background:rgba(0,30,60,.55)}
     <div class="tablewrap"><table id="repoTable"></table></div>
   </section>
 </main>
+
 
 <dialog id="dlg" aria-labelledby="dlgTitle"></dialog>
 <input type="file" id="fileInput" multiple hidden>
@@ -730,6 +754,56 @@ document.addEventListener("click",e=>{
   if(ph){ e.preventDefault(); toast("Mock link: this will open the "+ph.dataset.placeholder); }
 });
 
+/* ---------- Feedback (NPS) ---------- */
+const FBKEY="focus-mock-feedback";
+let FB=[]; try{ FB=JSON.parse(localStorage.getItem(FBKEY))||[]; }catch(e){}
+let fbSent=false;
+function renderFeedback(){
+  const panel=document.getElementById("fbPanel");
+  const thanks = fbSent ? `<div class="thanks" role="status"><h2>Thanks for your feedback</h2><p>The CITI team reviews every response. You can send more feedback at any time.</p></div>` : "";
+  panel.innerHTML = `${thanks}
+   <form id="fbForm" novalidate>
+    <fieldset class="field"><legend class="lbl" style="font-weight:600">How likely are you to recommend the FOCUS tracker to a colleague? <span class="req" aria-hidden="true">*</span></legend>
+      <div class="nps">${Array.from({length:11},(_,i)=>`<label><input type="radio" name="score" value="${i}"><span>${i}</span></label>`).join("")}</div>
+      <div class="nps-ends" aria-hidden="true"><span>0 Not at all likely</span><span>10 Extremely likely</span></div>
+      <p class="warn" id="fbWarn" hidden>Choose a score from 0 to 10.</p>
+    </fieldset>
+    <div class="field"><label for="fbReason">What is the main reason for your score?</label><textarea id="fbReason"></textarea></div>
+    <div class="field"><label for="fbBetter">What one thing would make the tracker more useful?</label><textarea id="fbBetter"></textarea></div>
+    <fieldset class="field"><legend class="lbl" style="font-weight:600;margin-bottom:.35rem">Which part of the tracker were you using most?</legend>
+      <div class="checks">${["Logging a project","Moving through FOCUS stages","PDSA cycles","QI charting tools","Project repository","Exporting to Pulse"].map(o=>`<label><input type="checkbox" name="area" value="${o}">${o}</label>`).join("")}</div></fieldset>
+    <fieldset class="field"><legend class="lbl" style="font-weight:600;margin-bottom:.35rem">Can we contact you about your feedback?</legend>
+      <div class="seg"><label><input type="radio" name="contact" value="Yes"><span>Yes</span></label><label><input type="radio" name="contact" value="No" checked><span>No</span></label></div></fieldset>
+    <div class="field" id="fbEmailWrap" hidden><label for="fbEmail">Your email</label><input type="email" id="fbEmail" placeholder="name@gstt.nhs.uk"></div>
+    <div class="actions"><button type="submit" class="btn">Send feedback</button></div>
+   </form>`;
+  const f=document.getElementById("fbForm");
+  f.addEventListener("change",e=>{ if(e.target.name==="contact") document.getElementById("fbEmailWrap").hidden=e.target.value!=="Yes"; if(e.target.name==="score") document.getElementById("fbWarn").hidden=true; });
+  f.addEventListener("submit",e=>{
+    e.preventDefault();
+    const sc=f.querySelector('input[name="score"]:checked');
+    if(!sc){ const w=document.getElementById("fbWarn"); w.hidden=false; f.querySelector('input[name="score"]').focus(); return; }
+    FB.push({date:today(),score:+sc.value,reason:document.getElementById("fbReason").value.trim(),better:document.getElementById("fbBetter").value.trim(),
+      areas:[...f.querySelectorAll('input[name="area"]:checked')].map(i=>i.value),contact:f.querySelector('input[name="contact"]:checked').value,email:document.getElementById("fbEmail").value.trim()});
+    try{ localStorage.setItem(FBKEY,JSON.stringify(FB)); }catch(err){}
+    fbSent=true; renderFeedback(); window.scrollTo({top:0,behavior:"smooth"}); toast("Feedback sent");
+  });
+  renderFbAside();
+}
+function renderFbAside(){
+  const n=FB.length, pro=FB.filter(r=>r.score>=9).length, det=FB.filter(r=>r.score<=6).length, pas=n-pro-det;
+  const pct=x=>n?Math.round(x/n*100):0, nps=n?pct(pro)-pct(det):null;
+  document.getElementById("fbAside").innerHTML = `
+   <div class="card"><h3>Net Promoter Score</h3>
+    ${n?`<p style="margin:0;font-size:2.4rem;font-weight:800;line-height:1;color:var(--blue)">${nps>0?"+":""}${nps}</p>
+     <p class="hint" style="margin:.3rem 0 0">From ${n} response${n>1?"s":""}</p>
+     <div class="npsbar" aria-hidden="true"><i style="width:${pct(det)}%;background:var(--danger)"></i><i style="width:${pct(pas)}%;background:var(--muted)"></i><i style="width:${pct(pro)}%;background:var(--green)"></i></div>
+     <dl><dt>Promoters (9–10)</dt><dd>${pct(pro)}%</dd><dt>Passives (7–8)</dt><dd>${pct(pas)}%</dd><dt>Detractors (0–6)</dt><dd>${pct(det)}%</dd></dl>`
+    :`<p class="empty" style="margin:0">No responses yet. Scores appear here once feedback is sent.</p>`}
+   </div>
+   <div class="card"><h3>How the score works</h3><p style="margin:0;font-size:.93rem">NPS is the percentage of promoters minus the percentage of detractors, giving a score from −100 to +100.</p></div>`;
+}
+
 /* ---------- Routing ---------- */
 function route(){
   let h=(location.hash||"#mine").slice(1);
@@ -737,17 +811,18 @@ function route(){
     const p=blankProject(); S.projects.unshift(p); S.current=p.id; viewStage=0; save();
     history.replaceState(null,"","#project"); h="project"; toast("New project started");
   }
-  if(!["project","mine","repo"].includes(h)) h="mine";
+  if(!["project","mine","repo","feedback"].includes(h)) h="mine";
   document.querySelectorAll(".view").forEach(v=>v.hidden=v.id!=="view-"+h);
   document.querySelectorAll("[data-nav]").forEach(a=>a.toggleAttribute("aria-current",a.dataset.nav===h) || a.removeAttribute("aria-current"));
   document.querySelectorAll("[data-nav]").forEach(a=>{ if(a.dataset.nav===h) a.setAttribute("aria-current","page"); });
-  if(h==="project") renderProject(); if(h==="mine") renderMine(); if(h==="repo") renderRepo();
+  if(h==="project") renderProject(); if(h==="mine") renderMine(); if(h==="repo") renderRepo(); if(h==="feedback") renderFeedback();
   window.scrollTo(0,0);
 }
 document.getElementById("toolsList").innerHTML=TOOLS.map(toolItem).join("");
-const toolsMenu=document.getElementById("toolsMenu");
-document.addEventListener("click",e=>{ if(toolsMenu.open && !toolsMenu.contains(e.target)) toolsMenu.open=false; });
-document.addEventListener("keydown",e=>{ if(e.key==="Escape" && toolsMenu.open){ toolsMenu.open=false; toolsMenu.querySelector("summary").focus(); } });
+const menus=[...document.querySelectorAll("details.tools")];
+menus.forEach(m=>m.addEventListener("toggle",()=>{ if(m.open) menus.forEach(o=>{ if(o!==m) o.open=false; }); }));
+document.addEventListener("click",e=>{ menus.forEach(m=>{ if(m.open && !m.contains(e.target)) m.open=false; }); });
+document.addEventListener("keydown",e=>{ if(e.key!=="Escape") return; const m=menus.find(x=>x.open); if(m){ m.open=false; m.querySelector("summary").focus(); } });
 window.addEventListener("hashchange",route);
 route();
 </script>
