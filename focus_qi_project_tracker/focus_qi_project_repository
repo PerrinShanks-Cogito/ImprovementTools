@@ -300,7 +300,8 @@ const TOOLS = [
  {n:"Histogram",s:"In ideation",c:"idea"},
  {n:"PDSA snapshot generator",s:"In ideation",c:"idea"},
  {n:"Regression analysis tool",s:"In ideation",c:"idea"},
- {n:"Three factor test design matrix",s:"In ideation",c:"idea"}
+ {n:"Three factor test design matrix",s:"In ideation",c:"idea"},
+ {n:"Highlight report",s:"In ideation",c:"idea"}
 ];
 const toolItem = t => `<li>${t.url?`<a href="${t.url}" target="_blank" rel="noopener">${t.n}</a>`:`<span class="off">${t.n}</span>`}<span class="tag ${t.c}">${t.s}</span></li>`;
 
