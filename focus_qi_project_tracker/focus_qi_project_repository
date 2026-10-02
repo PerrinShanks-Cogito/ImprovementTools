@@ -239,7 +239,6 @@ dialog::backdrop{background:rgba(0,30,60,.55)}
         <a href="#mine" data-nav="mine">My projects</a>
         <a href="#project" data-nav="project">Current project</a>
         <a href="#repo" data-nav="repo">Project repository</a>
-        <a href="#new" id="newProject">Start a new project</a>
         <a href="#feedback" data-nav="feedback">Feedback</a>
       </nav>
     </div>
