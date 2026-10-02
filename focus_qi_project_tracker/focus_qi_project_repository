@@ -154,7 +154,7 @@ fieldset{border:0;padding:0;margin:0}
 .group-title{font-size:1.05rem;font-weight:700;margin:2rem 0 1rem;padding-top:1.25rem;border-top:1px solid var(--line)}
 
 .log{list-style:none;margin:.75rem 0 0;padding:0;display:grid;gap:.6rem}
-.log li{border-left:4px solid var(--blue);padding:.4rem .8rem;background:var(--bg);border-radius:0 4px 4px 0}
+.log li{display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;border-left:4px solid var(--blue);padding:.4rem .8rem;background:var(--bg);border-radius:0 4px 4px 0}
 .log time{display:block;font-size:.85rem;color:var(--muted);font-weight:600}
 
 .docs{margin-top:2rem;padding-top:1.25rem;border-top:1px solid var(--line)}
@@ -511,13 +511,13 @@ function fieldHTML(f,d){
         <div class="pdsa-add"><div><label for="pdsaChange" class="hint" style="margin:0 0 .3rem">What did this cycle change?</label><input type="text" id="pdsaChange" placeholder="For example: added a pharmacy prompt at the 10am huddle"></div>
         <div><span class="hint" style="margin:0 0 .3rem">Outcome</span><div class="seg" role="radiogroup" aria-label="Outcome">${OPTS.pdsaOutcome.map((o,i)=>`<label><input type="radio" name="pdsaOut" value="${o}"${i===0?" checked":""}><span>${o.replace("ed","")}</span></label>`).join("")}</div></div></div>
         <div style="margin-top:.6rem"><button type="button" class="btn secondary" data-act="addPdsa">Add PDSA cycle</button></div>
-        ${cyc.length?`<ol class="pdsa">${cyc.map((c,i)=>`<li><span>${esc(c.change)}</span><span class="out ${c.outcome}">${c.outcome}</span><button type="button" class="btn quiet danger" data-act="rmPdsa" data-i="${i}" aria-label="Remove cycle ${i+1}">Remove</button></li>`).join("")}</ol>`:`<p class="empty">No PDSA cycles listed yet.</p>`}</fieldset>`;}
+        ${cyc.length?`<ol class="pdsa">${cyc.map((c,i)=>`<li><span>${esc(c.change)}</span><span class="out ${c.outcome}">${c.outcome}</span><button type="button" class="xbtn" data-act="rmPdsa" data-i="${i}" aria-label="Delete cycle ${i+1}" title="Delete cycle"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></li>`).join("")}</ol>`:`<p class="empty">No PDSA cycles listed yet.</p>`}</fieldset>`;}
     case "log":
-      const list=(v||[]).slice().reverse();
+      const list=(v||[]).map((u,i)=>({...u,i})).reverse();
       return `<div class="field"><label for="${id}">${lab}</label><span class="hint">Add a dated note each time you test a change or reach a milestone.</span>
         <textarea id="${id}" placeholder="What did you test, what happened, what will you do next?"></textarea>
         <div style="margin-top:.6rem"><button type="button" class="btn secondary" data-act="addUpdate">Add update</button></div>
-        ${list.length?`<ul class="log">${list.map(u=>`<li><time>${fmt(u.date)}</time>${esc(u.text)}</li>`).join("")}</ul>`:`<p class="empty">No updates yet. Your first update will appear here.</p>`}</div>`;
+        ${list.length?`<ul class="log">${list.map(u=>`<li><div><time>${fmt(u.date)}</time>${esc(u.text)}</div><button type="button" class="xbtn" data-act="rmUpdate" data-i="${u.i}" aria-label="Delete update from ${fmt(u.date)}" title="Delete update"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></li>`).join("")}</ul>`:`<p class="empty">No updates yet. Your first update will appear here.</p>`}</div>`;
   }
 }
 
@@ -673,7 +673,8 @@ panel.addEventListener("click",e=>{
       if(!p.data.pdsaCount || +p.data.pdsaCount<p.data.pdsa.length) p.data.pdsaCount=String(p.data.pdsa.length);
       save(); renderProject(); toast("PDSA cycle added"); break;}
     case "exportPulse": exportPulse(p); break;
-    case "rmPdsa": p.data.pdsa.splice(+b.dataset.i,1); save(); renderProject(); toast("PDSA cycle removed"); break;
+    case "rmUpdate": p.data.updates.splice(+b.dataset.i,1); save(); renderProject(); toast("Update deleted"); break;
+    case "rmPdsa": p.data.pdsa.splice(+b.dataset.i,1); save(); renderProject(); toast("PDSA cycle deleted"); break;
     case "closeProject":
       if(!p.data.status||!p.data.completionDate){ toast("Add a project status and completion date to close"); return; }
       p.closed=true; p.stage=5; p.history.push({stage:5,date:p.data.completionDate}); save(); renderProject(); toast("Project closed"); break;
