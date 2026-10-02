@@ -67,6 +67,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.dev{background:#3A2E10;color:#FFD27A}}
 :root[data-theme="dark"] .tag.dev{background:#3A2E10;color:#FFD27A}
 .menu-note{font-size:.82rem;color:var(--muted);margin:.4rem .6rem .2rem}
+.pulse-row{display:flex;flex-wrap:wrap;gap:.75rem 1rem;align-items:center}
 .pdsa-add{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:end}
 .pdsa{list-style:none;margin:.9rem 0 0;padding:0;display:grid;gap:.5rem;counter-reset:c}
 .pdsa li{counter-increment:c;display:grid;grid-template-columns:auto 1fr auto auto;gap:.75rem;align-items:center;padding:.55rem .8rem;border:1px solid var(--line);border-radius:4px}
@@ -393,7 +394,8 @@ const STAGES = [
    {k:"realised",t:"radio3",l:"Did this project realise its expected benefits?",o:"realised"},
    {k:"learning",t:"textarea",l:"Key learning from your project"},
    {k:"poster",t:"url",l:"Link to poster",hint:"Paste a SharePoint or web link."},
-   {k:"scalable",t:"radio3",l:"Is this idea scalable?",o:"scalable"}
+   {k:"scalable",t:"radio3",l:"Is this idea scalable?",o:"scalable"},
+   {k:"pulse",t:"pulse",l:"Project promoted to Pulse"}
   ]}
 ];
 
@@ -468,6 +470,10 @@ function fieldHTML(f,d){
     case "checks":
       const arr=v||[];
       return `<fieldset class="field"><legend class="lbl" style="font-weight:600;margin-bottom:.35rem">${lab}</legend><div class="checks">${OPTS[f.o].map(o=>`<label><input type="checkbox" data-k="${f.k}" value="${esc(o)}"${arr.includes(o)?" checked":""}>${esc(o)}</label>`).join("")}</div></fieldset>`;
+    case "pulse":
+      return `<fieldset class="field"><legend class="lbl" style="font-weight:600;margin-bottom:.35rem">${lab}</legend>${hint}
+        <div class="pulse-row"><div class="seg">${["Yes","No"].map(o=>`<label><input type="radio" name="${id}" data-k="${f.k}" value="${o}"${v===o?" checked":""}><span>${o}</span></label>`).join("")}</div>
+        <button type="button" class="btn secondary" data-act="exportPulse">Export project for upload to Pulse</button></div></fieldset>`;
     case "number":
       return `<div class="field"><label for="${id}">${lab}</label>${hint}<input type="number" min="0" step="1" inputmode="numeric" id="${id}" data-k="${f.k}" value="${esc(v)}" style="max-width:8rem"${desc}></div>`;
     case "pdsa":{
@@ -635,6 +641,7 @@ panel.addEventListener("click",e=>{
       (p.data.pdsa=p.data.pdsa||[]).push({change:txt,outcome:out});
       if(!p.data.pdsaCount || +p.data.pdsaCount<p.data.pdsa.length) p.data.pdsaCount=String(p.data.pdsa.length);
       save(); renderProject(); toast("PDSA cycle added"); break;}
+    case "exportPulse": exportPulse(p); break;
     case "rmPdsa": p.data.pdsa.splice(+b.dataset.i,1); save(); renderProject(); toast("PDSA cycle removed"); break;
     case "closeProject":
       if(!p.data.status||!p.data.completionDate){ toast("Add a project status and completion date to close"); return; }
@@ -652,6 +659,39 @@ document.getElementById("rail").addEventListener("keydown",e=>{
   viewStage=(viewStage+(e.key==="ArrowRight"?1:-1)+STAGES.length)%STAGES.length;
   renderProject(); document.getElementById("tab_"+STAGES[viewStage].id).focus();
 });
+
+/* ---------- Export for Pulse ---------- */
+function pulseCSV(p){
+  const d=p.data, v=x=>Array.isArray(x)?x.join("; "):(x??"");
+  const cols=[["Project ID",p.id],["Project title",d.title],["Description",d.description],["Expected benefits",d.expectedBenefits],
+    ["Clinical group / corporate team",d.group],["Quality domain",d.domain],["Submission type",d.submissionType],["Submitter",d.submitter],
+    ["Project lead",d.leadName],["Project lead email",d.leadEmail],["Project lead professional group",d.profession],
+    ["Line manager / sponsor",d.sponsor],["Sponsor support",d.sponsorSupport],["Project coach / advisor",d.coach],["QI collaborators",(d.collaborators||"").replace(/\n+/g,"; ")],
+    ["Project sites",d.sites],["Lifecycle stage",stageLabel(p)],["Start date",p.created],
+    ["Lifecycle history",p.history.map(h=>STAGES[h.stage].name+" ("+h.date+")")],
+    ["How improvement is measured",d.measuring],["Supporting evidence",d.evidence],["Current state",d.currentState],["Baseline measures",d.baseline],
+    ["SMART aim",d.smartAim],["Plan on a Page",d.planOnPage],["Solutions to test",d.solutions],
+    ["Completed PDSA cycles",d.pdsaCount],["PDSA cycles",(d.pdsa||[]).map((c,i)=>"Cycle "+(i+1)+": "+c.change+" ("+c.outcome+")")],
+    ["Progress updates",(d.updates||[]).map(u=>u.date+": "+u.text)],["Improvements logged",d.loggedImprovements],
+    ["Sustainability plan",d.sustainPlan],["Established in business as usual",d.bau],
+    ["Project status",d.status],["Completion date",d.completionDate],["Expected benefits realised",d.realised],["Key learning",d.learning],
+    ["Poster link",d.poster],["Scalable",d.scalable],["Promoted to Pulse",d.pulse],
+    ["Documents",Object.entries(p.docs).flatMap(([st,fs])=>fs.map(f=>st+": "+f))]];
+  const q=x=>'"'+String(v(x)).replace(/"/g,'""')+'"';
+  return "\uFEFF"+cols.map(c=>q(c[0])).join(",")+"\r\n"+cols.map(c=>q(c[1])).join(",")+"\r\n";
+}
+async function exportPulse(p){
+  const csv=pulseCSV(p);
+  const name=((p.data.title||"project").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"-").slice(0,60)||"project")+"-pulse-export.csv";
+  let dl=null; try{ dl = window.claude?.use ? await window.claude.use("downloads") : null; }catch(e){}
+  if(dl){
+    try{ await dl.save({filename:name,data:csv}); toast("Export saved: "+name); }
+    catch(err){ toast(err?.code==="declined"?"Export cancelled":"Export isn't available here, try again shortly"); }
+    return;
+  }
+  try{ await navigator.clipboard.writeText(csv); toast("Download not available here, so the export was copied to your clipboard"); }
+  catch(e){ toast("Export isn't available in this view"); }
+}
 
 /* ---------- Lists ---------- */
 function miniRail(p){
