@@ -1,0 +1,362 @@
+/* =====================================================================
+   FOCUS Improvement Project Tracker — database schema
+   Target: Azure SQL Database (T-SQL). Maps cleanly to Dataverse tables.
+   ===================================================================== */
+
+CREATE SCHEMA focus;
+GO
+
+/* ---------------------------------------------------------------------
+   1. PEOPLE
+   One row per person who signs in. Populated from Entra ID on first
+   sign-in (object ID is the stable key; email can change).
+   --------------------------------------------------------------------- */
+CREATE TABLE focus.app_user (
+    user_id             INT IDENTITY        PRIMARY KEY,
+    entra_object_id     UNIQUEIDENTIFIER    NOT NULL UNIQUE,
+    display_name        NVARCHAR(200)       NOT NULL,
+    email               NVARCHAR(320)       NOT NULL,
+    is_coach            BIT                 NOT NULL DEFAULT 0,   -- QI coach / advisor
+    is_admin            BIT                 NOT NULL DEFAULT 0,   -- CITI admin
+    created_at          DATETIME2(0)        NOT NULL DEFAULT SYSUTCDATETIME(),
+    last_seen_at        DATETIME2(0)        NULL
+);
+CREATE INDEX ix_app_user_email ON focus.app_user(email);
+
+/* ---------------------------------------------------------------------
+   2. REFERENCE (LOOKUP) TABLES
+   Kept as tables, not hard-coded, so CITI can edit lists without a
+   release. is_active lets you retire options without breaking history.
+   --------------------------------------------------------------------- */
+CREATE TABLE focus.lifecycle_stage (
+    stage_id            TINYINT             PRIMARY KEY,
+    code                VARCHAR(20)         NOT NULL UNIQUE,
+    letter              NCHAR(1)            NOT NULL,
+    name                NVARCHAR(100)       NOT NULL,
+    sort_order          TINYINT             NOT NULL
+);
+
+CREATE TABLE focus.clinical_group (
+    clinical_group_id   INT IDENTITY        PRIMARY KEY,
+    name                NVARCHAR(150)       NOT NULL UNIQUE,
+    is_corporate        BIT                 NOT NULL DEFAULT 0,
+    is_active           BIT                 NOT NULL DEFAULT 1,
+    sort_order          INT                 NOT NULL DEFAULT 0
+);
+
+CREATE TABLE focus.quality_domain (
+    quality_domain_id   INT IDENTITY        PRIMARY KEY,
+    name                NVARCHAR(100)       NOT NULL UNIQUE,
+    is_active           BIT                 NOT NULL DEFAULT 1,
+    sort_order          INT                 NOT NULL DEFAULT 0
+);
+
+CREATE TABLE focus.submission_type (
+    submission_type_id  INT IDENTITY        PRIMARY KEY,
+    name                NVARCHAR(100)       NOT NULL UNIQUE,
+    is_active           BIT                 NOT NULL DEFAULT 1,
+    sort_order          INT                 NOT NULL DEFAULT 0
+);
+
+CREATE TABLE focus.professional_group (
+    professional_group_id INT IDENTITY      PRIMARY KEY,
+    name                NVARCHAR(100)       NOT NULL UNIQUE,
+    is_active           BIT                 NOT NULL DEFAULT 1,
+    sort_order          INT                 NOT NULL DEFAULT 0
+);
+
+CREATE TABLE focus.site (
+    site_id             INT IDENTITY        PRIMARY KEY,
+    name                NVARCHAR(100)       NOT NULL UNIQUE,
+    is_active           BIT                 NOT NULL DEFAULT 1,
+    sort_order          INT                 NOT NULL DEFAULT 0
+);
+
+/* ---------------------------------------------------------------------
+   3. PROJECT
+   Core record. Free-text stage fields live here (one per project).
+   All yes/no questions live in checklist_response (section 5) so the
+   question set can change without schema changes.
+   System-versioned: every change is kept in project_history for audit.
+   --------------------------------------------------------------------- */
+CREATE TABLE focus.project (
+    project_id              INT IDENTITY        PRIMARY KEY,
+    reference               AS ('FOCUS-' + RIGHT('00000' + CAST(project_id AS VARCHAR(10)), 5)) PERSISTED,
+
+    -- Find the opportunity
+    title                   NVARCHAR(250)       NOT NULL,
+    description             NVARCHAR(MAX)       NULL,
+    expected_benefits       NVARCHAR(MAX)       NULL,
+    clinical_group_id       INT                 NULL REFERENCES focus.clinical_group,
+    quality_domain_id       INT                 NULL REFERENCES focus.quality_domain,
+    submission_type_id      INT                 NULL REFERENCES focus.submission_type,
+    lead_professional_group_id INT              NULL REFERENCES focus.professional_group,
+    sponsor_supports        BIT                 NULL,        -- NULL = not answered
+
+    -- Observe the current state
+    measurement_approach    NVARCHAR(MAX)       NULL,
+    supporting_evidence     NVARCHAR(MAX)       NULL,
+    current_state           NVARCHAR(MAX)       NULL,
+    baseline_measures       NVARCHAR(MAX)       NULL,
+
+    -- Undertake the plan
+    pdsa_cycles_completed   SMALLINT            NULL CHECK (pdsa_cycles_completed >= 0),
+
+    -- Close
+    project_status          VARCHAR(30)         NULL CHECK (project_status IN
+                                ('Completed','Closed, not progressed','On hold','Merged')),
+    completion_date         DATE                NULL,
+    benefits_realised       VARCHAR(20)         NULL CHECK (benefits_realised IN
+                                ('Yes','Partially','No','Too early to tell')),
+    key_learning            NVARCHAR(MAX)       NULL,
+    poster_url              NVARCHAR(1000)      NULL,
+    is_scalable             VARCHAR(10)         NULL CHECK (is_scalable IN ('Yes','No','Not sure')),
+    promoted_to_pulse       BIT                 NULL,
+
+    -- Lifecycle state (denormalised from stage_transition for fast lists)
+    current_stage_id        TINYINT             NOT NULL DEFAULT 1 REFERENCES focus.lifecycle_stage,
+    is_closed               BIT                 NOT NULL DEFAULT 0,
+
+    -- Housekeeping
+    created_by              INT                 NOT NULL REFERENCES focus.app_user,
+    created_at              DATETIME2(0)        NOT NULL DEFAULT SYSUTCDATETIME(),
+    updated_by              INT                 NULL REFERENCES focus.app_user,
+    updated_at              DATETIME2(0)        NULL,
+    deleted_at              DATETIME2(0)        NULL,        -- soft delete
+    deleted_by              INT                 NULL REFERENCES focus.app_user,
+    row_version             ROWVERSION,                      -- optimistic concurrency
+
+    valid_from              DATETIME2(0) GENERATED ALWAYS AS ROW START HIDDEN NOT NULL,
+    valid_to                DATETIME2(0) GENERATED ALWAYS AS ROW END   HIDDEN NOT NULL,
+    PERIOD FOR SYSTEM_TIME (valid_from, valid_to),
+
+    CONSTRAINT ck_project_closed CHECK (is_closed = 0 OR (project_status IS NOT NULL AND completion_date IS NOT NULL))
+)
+WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = focus.project_history));
+
+CREATE INDEX ix_project_stage   ON focus.project(current_stage_id, is_closed) WHERE deleted_at IS NULL;
+CREATE INDEX ix_project_group   ON focus.project(clinical_group_id)          WHERE deleted_at IS NULL;
+
+/* Sites: many-to-many */
+CREATE TABLE focus.project_site (
+    project_id          INT                 NOT NULL REFERENCES focus.project ON DELETE CASCADE,
+    site_id             INT                 NOT NULL REFERENCES focus.site,
+    PRIMARY KEY (project_id, site_id)
+);
+
+/* ---------------------------------------------------------------------
+   4. PEOPLE ON A PROJECT
+   One table for every role. user_id is filled when the person has
+   signed in; name/email cover people who haven't (yet), e.g. a sponsor
+   typed in by the submitter. This also drives "My projects" and
+   edit permissions.
+   --------------------------------------------------------------------- */
+CREATE TABLE focus.project_member (
+    project_member_id   INT IDENTITY        PRIMARY KEY,
+    project_id          INT                 NOT NULL REFERENCES focus.project ON DELETE CASCADE,
+    role                VARCHAR(20)         NOT NULL CHECK (role IN
+                            ('Submitter','Lead','Sponsor','Coach','Collaborator')),
+    user_id             INT                 NULL REFERENCES focus.app_user,
+    display_name        NVARCHAR(200)       NOT NULL,
+    email               NVARCHAR(320)       NULL,
+    team_or_note        NVARCHAR(200)       NULL,           -- e.g. collaborator's team
+    can_edit            BIT                 NOT NULL DEFAULT 0,
+    added_at            DATETIME2(0)        NOT NULL DEFAULT SYSUTCDATETIME()
+);
+CREATE INDEX ix_member_user    ON focus.project_member(user_id, role);
+CREATE INDEX ix_member_email   ON focus.project_member(email);
+CREATE INDEX ix_member_project ON focus.project_member(project_id, role);
+
+/* ---------------------------------------------------------------------
+   5. CHECKLISTS
+   Every yes/no question — the "Ready to move on" pop-ups AND the yes/no
+   fields shown on the Create/Undertake/Sustain pages — is a row in
+   checklist_question. Answers are stored once, so the page field and
+   the pop-up always agree.
+   --------------------------------------------------------------------- */
+CREATE TABLE focus.checklist_question (
+    question_id         INT IDENTITY        PRIMARY KEY,
+    stage_id            TINYINT             NOT NULL REFERENCES focus.lifecycle_stage,
+    code                VARCHAR(40)         NOT NULL UNIQUE,  -- stable key used by the app
+    question_text       NVARCHAR(400)       NOT NULL,
+    help_text           NVARCHAR(400)       NULL,
+    help_links_json     NVARCHAR(MAX)       NULL CHECK (ISJSON(help_links_json) = 1),
+    show_on_stage_page  BIT                 NOT NULL DEFAULT 0,
+    show_in_checklist   BIT                 NOT NULL DEFAULT 1,
+    is_ready_gate       BIT                 NOT NULL DEFAULT 0, -- "Ready to move to the next stage?"
+    sort_order          INT                 NOT NULL DEFAULT 0,
+    is_active           BIT                 NOT NULL DEFAULT 1
+);
+
+CREATE TABLE focus.checklist_response (
+    project_id          INT                 NOT NULL REFERENCES focus.project ON DELETE CASCADE,
+    question_id         INT                 NOT NULL REFERENCES focus.checklist_question,
+    answer              BIT                 NOT NULL,          -- 1 = Yes, 0 = No
+    answered_by         INT                 NOT NULL REFERENCES focus.app_user,
+    answered_at         DATETIME2(0)        NOT NULL DEFAULT SYSUTCDATETIME(),
+    PRIMARY KEY (project_id, question_id)
+);
+
+/* ---------------------------------------------------------------------
+   6. LIFECYCLE HISTORY
+   One row per stage change, including moves backwards. Never updated
+   or deleted. project.current_stage_id is set from the latest row.
+   --------------------------------------------------------------------- */
+CREATE TABLE focus.stage_transition (
+    transition_id       INT IDENTITY        PRIMARY KEY,
+    project_id          INT                 NOT NULL REFERENCES focus.project ON DELETE CASCADE,
+    from_stage_id       TINYINT             NULL REFERENCES focus.lifecycle_stage, -- NULL on creation
+    to_stage_id         TINYINT             NOT NULL REFERENCES focus.lifecycle_stage,
+    change_date         DATE                NOT NULL,          -- date the user entered
+    changed_by          INT                 NOT NULL REFERENCES focus.app_user,
+    recorded_at         DATETIME2(0)        NOT NULL DEFAULT SYSUTCDATETIME()
+);
+CREATE INDEX ix_transition_project ON focus.stage_transition(project_id, recorded_at);
+
+/* ---------------------------------------------------------------------
+   7. UNDERTAKE THE PLAN — PDSA cycles and progress updates
+   --------------------------------------------------------------------- */
+CREATE TABLE focus.pdsa_cycle (
+    pdsa_cycle_id       INT IDENTITY        PRIMARY KEY,
+    project_id          INT                 NOT NULL REFERENCES focus.project ON DELETE CASCADE,
+    sequence_no         SMALLINT            NOT NULL,          -- display order; renumbered on delete
+    change_tested       NVARCHAR(1000)      NOT NULL,
+    outcome             VARCHAR(10)         NOT NULL CHECK (outcome IN ('Adopted','Adapted','Abandoned')),
+    created_by          INT                 NOT NULL REFERENCES focus.app_user,
+    created_at          DATETIME2(0)        NOT NULL DEFAULT SYSUTCDATETIME(),
+    deleted_at          DATETIME2(0)        NULL
+);
+CREATE INDEX ix_pdsa_project ON focus.pdsa_cycle(project_id, sequence_no) WHERE deleted_at IS NULL;
+
+CREATE TABLE focus.progress_update (
+    progress_update_id  INT IDENTITY        PRIMARY KEY,
+    project_id          INT                 NOT NULL REFERENCES focus.project ON DELETE CASCADE,
+    update_date         DATE                NOT NULL,
+    body                NVARCHAR(4000)      NOT NULL,
+    created_by          INT                 NOT NULL REFERENCES focus.app_user,
+    created_at          DATETIME2(0)        NOT NULL DEFAULT SYSUTCDATETIME(),
+    deleted_at          DATETIME2(0)        NULL
+);
+CREATE INDEX ix_update_project ON focus.progress_update(project_id, update_date DESC) WHERE deleted_at IS NULL;
+
+/* ---------------------------------------------------------------------
+   8. DOCUMENTS
+   Files live in Blob Storage (or SharePoint); the database holds the
+   pointer and metadata only.
+   --------------------------------------------------------------------- */
+CREATE TABLE focus.project_document (
+    document_id         INT IDENTITY        PRIMARY KEY,
+    project_id          INT                 NOT NULL REFERENCES focus.project ON DELETE CASCADE,
+    stage_id            TINYINT             NOT NULL REFERENCES focus.lifecycle_stage,
+    file_name           NVARCHAR(260)       NOT NULL,
+    storage_path        NVARCHAR(1000)      NOT NULL,          -- blob path or SharePoint URL
+    content_type        VARCHAR(150)        NULL,
+    size_bytes          BIGINT              NULL,
+    uploaded_by         INT                 NOT NULL REFERENCES focus.app_user,
+    uploaded_at         DATETIME2(0)        NOT NULL DEFAULT SYSUTCDATETIME(),
+    deleted_at          DATETIME2(0)        NULL
+);
+CREATE INDEX ix_document_project ON focus.project_document(project_id, stage_id) WHERE deleted_at IS NULL;
+
+/* ---------------------------------------------------------------------
+   9. PULSE EXPORT LOG
+   --------------------------------------------------------------------- */
+CREATE TABLE focus.pulse_export (
+    pulse_export_id     INT IDENTITY        PRIMARY KEY,
+    project_id          INT                 NOT NULL REFERENCES focus.project ON DELETE CASCADE,
+    exported_by         INT                 NOT NULL REFERENCES focus.app_user,
+    exported_at         DATETIME2(0)        NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+/* ---------------------------------------------------------------------
+   10. VIEWS FOR THE APP'S LIST PAGES
+   --------------------------------------------------------------------- */
+CREATE VIEW focus.vw_project_list AS
+SELECT  p.project_id,
+        p.reference,
+        p.title,
+        LEFT(p.expected_benefits, 200)                 AS expected_benefits_preview,
+        s.name                                         AS current_stage,
+        p.current_stage_id,
+        p.is_closed,
+        cg.name                                        AS clinical_group,
+        qd.name                                        AS quality_domain,
+        lead.display_name                              AS lead_name,
+        lead.email                                     AS lead_email,
+        STUFF((SELECT ', ' + si.name
+               FROM focus.project_site ps JOIN focus.site si ON si.site_id = ps.site_id
+               WHERE ps.project_id = p.project_id
+               ORDER BY si.sort_order
+               FOR XML PATH(''), TYPE).value('.','nvarchar(max)'), 1, 2, '') AS sites,
+        (SELECT MAX(change_date) FROM focus.stage_transition t WHERE t.project_id = p.project_id) AS last_stage_change,
+        p.created_at
+FROM    focus.project p
+JOIN    focus.lifecycle_stage s   ON s.stage_id = p.current_stage_id
+LEFT JOIN focus.clinical_group cg ON cg.clinical_group_id = p.clinical_group_id
+LEFT JOIN focus.quality_domain qd ON qd.quality_domain_id = p.quality_domain_id
+OUTER APPLY (SELECT TOP 1 m.display_name, m.email
+             FROM focus.project_member m
+             WHERE m.project_id = p.project_id AND m.role = 'Lead'
+             ORDER BY m.project_member_id) lead
+WHERE   p.deleted_at IS NULL;
+GO
+
+/* "My projects" = any project where I hold a role. Call with the
+   signed-in user's id, e.g. SELECT * FROM focus.fn_my_projects(42). */
+CREATE FUNCTION focus.fn_my_projects (@user_id INT)
+RETURNS TABLE AS RETURN
+SELECT  l.*,
+        STRING_AGG(m.role, ', ') AS my_roles
+FROM    focus.vw_project_list l
+JOIN    focus.project_member m ON m.project_id = l.project_id AND m.user_id = @user_id
+GROUP BY l.project_id, l.reference, l.title, l.expected_benefits_preview, l.current_stage,
+         l.current_stage_id, l.is_closed, l.clinical_group, l.quality_domain,
+         l.lead_name, l.lead_email, l.sites, l.last_stage_change, l.created_at;
+GO
+
+/* ---------------------------------------------------------------------
+   11. SEED DATA
+   --------------------------------------------------------------------- */
+INSERT focus.lifecycle_stage (stage_id, code, letter, name, sort_order) VALUES
+ (1,'find','F',N'Find the opportunity',1),
+ (2,'observe','O',N'Observe the current state',2),
+ (3,'create','C',N'Create the plan',3),
+ (4,'undertake','U',N'Undertake the plan',4),
+ (5,'sustain','S',N'Sustain the benefit',5),
+ (6,'close',N'✓',N'Close',6);
+
+INSERT focus.site (name, sort_order) VALUES
+ (N'St Thomas''',1),(N'Guy''s',2),(N'Royal Brompton',3),(N'Harefield',4),(N'Evelina',5);
+
+INSERT focus.quality_domain (name, sort_order) VALUES
+ (N'Safe',1),(N'Effective',2),(N'Patient-centred',3),(N'Timely',4),(N'Efficient',5),(N'Equitable',6);
+
+INSERT focus.checklist_question (stage_id, code, question_text, help_text, help_links_json, show_on_stage_page, show_in_checklist, is_ready_gate, sort_order) VALUES
+ -- Find
+ (1,'find_clear',      N'Are you clear on what you are trying to accomplish?', NULL, NULL, 0,1,0,1),
+ (1,'find_chatbot',    N'Have you run your opportunity by our QI Coach chatbot?', NULL,
+    N'[{"label":"QI Coach chatbot","url":"https://m365.cloud.microsoft/chat/?titleId=T_9a8ef1bb-12ee-5134-a332-f2a26e2f1bd9&source=embedded-builder"}]', 0,1,0,2),
+ (1,'find_tools',      N'Have you checked out our QI tools section?', N'Fishbone diagrams can be useful in analysing root causes.', NULL, 0,1,0,3),
+ (1,'find_aligned',    N'Is your project aligned with strategic goals?', NULL,
+    N'[{"label":"Our improvement priorities","url":"https://intranet.gstt.nhs.uk/clinical-services/how-we-keep-patients-safe-and-improve-our-care/our-improvement-priorities/"},{"label":"GIRFT","url":"https://gettingitrightfirsttime.co.uk/"},{"label":"Model Hospital","url":"https://model.nhs.uk/"}]', 0,1,0,4),
+ (1,'find_ready',      N'Ready to move to the next stage?', NULL, NULL, 0,1,1,99),
+ -- Observe
+ (2,'obs_rca',         N'Have you developed a full understanding of the current state using root cause analysis techniques?', NULL, NULL, 0,1,0,1),
+ (2,'obs_baseline',    N'Have you established a baseline measurement?', NULL, NULL, 0,1,0,2),
+ (2,'obs_team',        N'Have you briefed your project team?', N'If it is only you, just mark yes.', NULL, 0,1,0,3),
+ (2,'obs_stakeholders',N'Have you engaged with customer side stakeholders?', NULL, NULL, 0,1,0,4),
+ (2,'obs_ready',       N'Ready to move to the next stage?', NULL, NULL, 0,1,1,99),
+ -- Create
+ (3,'cre_smart',       N'Do you have a SMART aim?', N'Specific, measurable, achievable, relevant and time-bound.', NULL, 1,1,0,1),
+ (3,'cre_poap',        N'Have you created a Plan on a Page?', NULL, NULL, 1,1,0,2),
+ (3,'cre_solutions',   N'Do you have a list of solutions to test?', NULL, NULL, 1,1,0,3),
+ (3,'cre_ready',       N'Ready to move to the next stage?', NULL, NULL, 0,1,1,99),
+ -- Undertake
+ (4,'und_logged',      N'Have you logged the improvements you have undertaken?', NULL, NULL, 1,1,0,1),
+ (4,'und_ready',       N'Ready to move to the next stage?', NULL, NULL, 0,1,1,99),
+ -- Sustain
+ (5,'sus_plan',        N'Have you created a sustainability plan?', NULL, NULL, 1,1,0,1),
+ (5,'sus_bau',         N'Has the change been established in business as usual?', NULL, NULL, 1,1,0,2),
+ (5,'sus_ready',       N'Ready to move to the next stage?', NULL, NULL, 0,1,1,99);
+GO
