@@ -212,34 +212,101 @@ const state = {
 let model = null;
 
 /* ---------- Parsing ---------- */
+function cleanNum(raw){
+  if (raw === undefined || raw === null) return NaN;
+  let t = String(raw).trim().replace(/^"(.*)"$/, '$1').replace(/[\u2212\u2013\u2014]/g, '-').replace(/[£$€%\s\u00a0]/g, '');
+  if (t === '') return NaN;
+  t = t.replace(/(\d),(?=\d{3}(\D|$))/g, '$1');
+  const par = t.match(/^\((.*)\)$/); if (par) t = '-' + par[1];
+  const m = t.match(/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?/i);
+  if (!m) return NaN;
+  const rest = t.slice(m[0].length);
+  if (rest && !/^[a-z/]+$/i.test(rest)) return NaN;   // allow units like "42days", reject "12/05/2024"
+  return Number(m[0]);
+}
+function decimalsOf(raw){ const t = String(raw).replace(/(\d),(?=\d{3}(\D|$))/g, '$1'); const m = t.match(/\.(\d+)/); return m ? m[1].length : 0; }
+function splitCSV(line){
+  const out = []; let cur = '', q = false;
+  for (let i = 0; i < line.length; i++){
+    const c = line[i];
+    if (q){ if (c === '"' && line[i + 1] === '"'){ cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+    else if (c === '"') q = true; else if (c === ','){ out.push(cur.trim()); cur = ''; } else cur += c;
+  }
+  out.push(cur.trim()); return out;
+}
 function parse(text){
-  const lines = text.split(/\r?\n/);
+  const lines = text.split(/\r\n|\r|\n/);
   const nonEmpty = lines.filter(l => l.trim() !== '');
+  const thousandsOnly = nonEmpty.length && nonEmpty.every(l => /^\s*"?[-(]?[£$€]?\d{1,3}(,\d{3})+(\.\d+)?\)?%?"?\s*$/.test(l));
   let delim = 'ws';
   if (nonEmpty.some(l => l.includes('\t'))) delim = '\t';
   else if (nonEmpty.some(l => l.includes(';'))) delim = ';';
-  else if (nonEmpty.some(l => l.includes(','))) delim = ',';
-  const rows = [], skipped = []; let header = null, decimals = 0;
-  lines.forEach((line, idx) => {
-    const t = line.trim(); if (!t) return;
-    let fields;
-    if (delim === 'ws') fields = t.split(/\s+/);
-    else fields = t.split(delim).map(f => f.trim().replace(/^"(.*)"$/, '$1'));
-    while (fields.length > 1 && fields[fields.length - 1] === '') fields.pop();
-    const rawVal = fields[fields.length - 1];
-    let v = rawVal.replace(/[%£$€\s]/g, '');
-    if (delim !== ',') v = v.replace(/,/g, '');
-    const num = v === '' ? NaN : Number(v);
-    if (!isFinite(num)) {
-      if (rows.length === 0 && skipped.length === 0 && header === null) header = fields;
-      else skipped.push(idx + 1);
+  else if (!thousandsOnly && nonEmpty.some(l => l.includes(','))) delim = ',';
+  else if (thousandsOnly) delim = 'single';
+  const splitLine = t => {
+    if (delim === 'single') return [t];
+    if (delim === ',') return splitCSV(t);
+    if (delim === 'ws') return t.split(/[\s\u00a0]+/);
+    return t.split(delim).map(f => f.trim().replace(/^"(.*)"$/, '$1'));
+  };
+  const recs = [];
+  lines.forEach((line, idx) => { const t = line.trim(); if (t) recs.push({ idx, f: splitLine(t) }); });
+  const rows = [], skipped = []; let header = null, decimals = 0, note = '';
+  const numericShare = arr => arr.filter(v => isFinite(cleanNum(v))).length / Math.max(1, arr.length);
+
+  // Data laid out across a row (or a row of labels above a row of values)
+  const maxF = Math.max(0, ...recs.map(r => r.f.length));
+  if (recs.length <= 2 && maxF >= 3 && delim !== 'ws'){
+    let labels = null, vals = recs[0].f;
+    if (recs.length === 2){
+      if (numericShare(recs[1].f) >= numericShare(recs[0].f)){ labels = recs[0].f; vals = recs[1].f; }
+      else { labels = recs[1].f; vals = recs[0].f; }
+    }
+    vals.forEach((raw, j) => {
+      const v = cleanNum(raw);
+      if (!isFinite(v)){ if (raw !== '' && !(j === 0 && labels === null)) skipped.push('column ' + (j + 1)); return; }
+      decimals = Math.max(decimals, decimalsOf(raw));
+      rows.push({ label: labels && labels[j] ? labels[j] : String(rows.length + 1), value: v });
+    });
+    note = 'Read as a row of values.';
+    return { rows, header: null, skipped, decimals: Math.min(decimals, 3), note };
+  }
+
+  if (delim === 'ws'){
+    recs.forEach(r => {
+      const raw = r.f[r.f.length - 1], v = cleanNum(raw);
+      if (!isFinite(v)){ if (!rows.length && header === null) header = r.f; else skipped.push(r.idx + 1); return; }
+      decimals = Math.max(decimals, decimalsOf(raw));
+      rows.push({ label: r.f.length > 1 ? r.f.slice(0, -1).join(' ') : String(rows.length + 1), value: v });
+    });
+    return { rows, header, skipped, decimals: Math.min(decimals, 3), note };
+  }
+
+  // Pick the value column: the one with the most numbers (rightmost wins a tie)
+  let valCol = 0, best = -1;
+  for (let c = 0; c < maxF; c++){
+    const cnt = recs.filter(r => isFinite(cleanNum(r.f[c]))).length;
+    if (cnt >= best){ best = cnt; valCol = c; }
+  }
+  const labelCol = valCol === 0 ? -1 : 0;
+  recs.forEach(r => {
+    const raw = r.f[valCol], v = cleanNum(raw);
+    if (!isFinite(v)){
+      if (!rows.length && header === null) header = r.f;
+      else if (!rows.length && header !== null && (raw || '').trim() !== '') { /* extra title row before data */ }
+      else skipped.push(r.idx + 1);
       return;
     }
-    const dm = v.split('.')[1]; if (dm) decimals = Math.max(decimals, dm.length);
-    const label = fields.length > 1 ? fields.slice(0, -1).join(' ') : String(rows.length + 1);
-    rows.push({ label, value: num });
+    decimals = Math.max(decimals, decimalsOf(raw));
+    const lab = labelCol >= 0 && r.f[labelCol] !== undefined && r.f[labelCol] !== '' ? r.f[labelCol] : String(rows.length + 1);
+    rows.push({ label: lab, value: v });
   });
-  return { rows, header, skipped, decimals: Math.min(decimals, 3) };
+  if (maxF > 2){
+    const name = header && header[valCol] ? `the \u201c${header[valCol]}\u201d column` : `column ${valCol + 1}`;
+    note = `Using ${name} for values.`;
+  }
+  if (header) header = [header[valCol] || ''];
+  return { rows, header, skipped, decimals: Math.min(decimals, 3), note };
 }
 
 /* ---------- Calculation ---------- */
@@ -341,7 +408,7 @@ function compute(){
 
 /* ---------- Formatting ---------- */
 function dp(){ return Math.min(3, state.decimals + 1); }
-function fmt(v, d){ if (!isFinite(v)) return '–'; return v.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: d === undefined ? dp() : d }); }
+function fmt(v, d){ if (v === null || v === undefined || !isFinite(v)) return '–'; return v.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: d === undefined ? dp() : d }); }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const trunc = (s, n) => s.length > n ? s.slice(0, n - 1) + '…' : s;
 function pointName(i){ const r = state.rows[i]; return /^\d+$/.test(r.label) && Number(r.label) === i + 1 ? 'point ' + (i + 1) : r.label; }
@@ -522,6 +589,13 @@ function assBadge(p){
 /* ---------- Render page ---------- */
 const out = $('#output');
 function renderAll(){
+  try { renderAllInner(); }
+  catch (err){
+    console.error(err);
+    out.innerHTML = `<div class="empty"><p style="margin:0">Something went wrong drawing this chart. Please check your data, and use “Give feedback” to report it if it keeps happening.</p></div>`;
+  }
+}
+function renderAllInner(){
   $('#chartTitle').textContent = state.title || 'Your SPC chart';
   renderChips();
   if (state.rows.length < 2){
@@ -561,7 +635,7 @@ function renderAll(){
     if (g.fixed) notes.push(`Limits${where} are fixed from its first ${g.be - g.s} points.`);
   });
   if (model.segs.length > 1) notes.push(`Limits are recalculated ${model.segs.length === 2 ? 'once' : (model.segs.length - 1) + ' times'}. Only do this where there's a known change to the process and a sustained signal.`);
-  if (state.skipped.length) notes.push(`Skipped line${state.skipped.length > 1 ? 's' : ''} ${state.skipped.slice(0, 8).join(', ')}${state.skipped.length > 8 ? '…' : ''} because the value wasn't a number.`);
+  if (state.skipped.length) notes.push(`Skipped ${typeof state.skipped[0] === 'string' ? '' : 'line' + (state.skipped.length > 1 ? 's ' : ' ')}${state.skipped.slice(0, 8).join(', ')}${state.skipped.length > 8 ? '…' : ''} because the value wasn't a number.`);
   if (notes.length) h += `<div class="notes">${notes.map(t => `<p>${esc(t)}</p>`).join('')}</div>`;
   h += `</div>`;
 
@@ -695,23 +769,24 @@ async function doSave(kind){
 let parseTimer;
 function readData(){
   const r = parse($('#data').value);
-  state.rows = r.rows; state.header = r.header; state.skipped = r.skipped; state.decimals = r.decimals;
+  state.rows = r.rows; state.header = r.header && r.header[0] ? r.header : null; state.skipped = r.skipped; state.decimals = r.decimals;
   [...state.breaks].forEach(b => { if (b >= r.rows.length) state.breaks.delete(b); });
   const ps = $('#parseStatus');
   if (!r.rows.length && !$('#data').value.trim()){ ps.textContent = ''; ps.className = 'status'; }
   else {
     let t = `${r.rows.length} value${r.rows.length === 1 ? '' : 's'} read.`;
-    if (r.header) t += ' First line used as a header.';
+    if (r.note) t += ' ' + r.note;
+    if (r.header && r.header[0]) t += ' First line used as a header.';
     if (r.skipped.length) t += ` ${r.skipped.length} line${r.skipped.length > 1 ? 's' : ''} skipped.`;
     ps.textContent = t; ps.className = 'status' + (r.skipped.length ? ' warn' : '');
   }
-  if (r.header && r.header.length && !$('#yLabel').value) $('#yLabel').placeholder = r.header[r.header.length - 1];
-  state.yLabel = $('#yLabel').value.trim() || (r.header ? r.header[r.header.length - 1] : '');
+  $('#yLabel').placeholder = state.header ? state.header[0] : 'e.g. Days';
+  state.yLabel = $('#yLabel').value.trim() || (state.header ? state.header[0] : '');
 }
 $('#data').addEventListener('input', () => { clearTimeout(parseTimer); parseTimer = setTimeout(() => { readData(); renderAll(); }, 180); });
 $('#title').addEventListener('input', e => { state.title = e.target.value.trim(); $('#chartTitle').textContent = state.title || 'Your SPC chart'; });
 $('#title').addEventListener('change', renderAll);
-$('#yLabel').addEventListener('input', e => { state.yLabel = e.target.value.trim() || (state.header ? state.header[state.header.length - 1] : ''); renderAll(); });
+$('#yLabel').addEventListener('input', e => { state.yLabel = e.target.value.trim() || (state.header ? state.header[0] : ''); renderAll(); });
 document.querySelectorAll('input[name=dir]').forEach(r => r.addEventListener('change', e => { state.dir = e.target.value; renderAll(); }));
 $('#target').addEventListener('input', e => { const v = e.target.value.trim(); state.target = v === '' || !isFinite(+v) ? null : +v; renderAll(); });
 $('#floor').addEventListener('change', e => { state.floor = e.target.checked; renderAll(); });
