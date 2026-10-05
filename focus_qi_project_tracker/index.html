@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FOCUS improvement project tracker (mock)</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAPmElEQVR42u1aZ3hVVdZea+99zm2596ZCGgQhgQRCGCAaFInKQOgCYm8g+qgzoiLqyOjA4Dig4Dh2RRGUogI2mhDqhKLBBEQCBAihBtJIuyW55Zy99/w4IQaVAF/49PP52MmvPDn7rHeVd7WDUkr4PR8Cv/NzGcBlAJcBXAbw2x72679SSiklnPkBBAAAREQERLzY2/BXS2RCSCElIlBCWv4fgkgI/h8CwIVA+FEmvz94srym7LSr1tUQ1HSF0TCHNaZNaHxMuMWsNiGRIFuA+isBEEICgCH64eMVa3IKNmzb98OBklOVLr0hADpv9CFGmcUU28aR1qXdwL5dh/TvkdQh+ieP/wYAOBeUEgDY9G3hWx+tz96611ftAULApIDKGCWEEEAACUJKXeeg6RDQgAtzeMjgfqkTxg34Y9/U5vf8egCMMCUE9xSVPDfzs5VrvwddQIhZURWCwLnQgzpoHDgHKQERCAGFUlVhjEiAYEAHrw8YGZHVc8bk21I7xwshzxXilx6AEYUA8MoHa6bM+tznbiBOG6VUCMEbAuAPgsqckY646LCocLvFrAY1vbrWe6qirqqyDnxBUBViMzNGdF0IV73FYZkx+daJ4wcZpPVzDJcYgBCSEPQHtPuemrP40xwIDWEKkwDc6wONJ6XEjxzYa1Bmavcu7dpEOppLU+vyHjhctvGbwq/W7vz+hyMgJHVYkaAe1KGu/p57b/hg1gMqY03a+V8BYNzuqfeNuP/VzRt2syinkFLoAtz1ab06/eXhoTcNvrKJZ87EqAQ4izSllGs3F8yc/XVOzh6wmqlJQQC9si5rWPqyORPNqmIkjUsPQEoppORcDBn3r03rdilRTi6k8AUZxWmTRj/10DCTwgBA5wINYjnbG4zHpQR2Jl7nLd385Auf1tXWU7uFIGiVruGj+yx/73EpgZAfzXDJAOhcMErGT5774Zy1SttQLqTw+mNiQhe/80jmlckGmTR/ccv0hYiE4P7Dpbf+6c29e47T0BCCoJXXPf7kqNeeu9N416UEYDDd/K+2jXvwTRbpFFKK+kCH9hHrPpmclNBW0zmj9GKrBE3nCqNVdd7Bd8/a+f1h6rShkLrLu2zR0yMH9Gri1ksAQEiJAOVVrm4Dn3W5fagyGdCdIaZvlk9N6Rjr13STwi62xOFCUEIMTVdWuzJGPn/sRBWzmXlDICY2vHDtdHuIxSDWS1CNSiERcdoby2tP1RCTAlKKYPCj1x9K6RgLEswXKb2U0pBeSEkI6ly0iXAueWeCwojUObOZSw+VzpyzmhBszNOt501KyeETlfOXbiVOKwDwWu+4e/rf2L+nEHLVyWP3bliTX1VpGOo8ohtVEyIlZP2+gwTR+A1q/Kq0js88NpLX1UuQ6LC+vWBjRZWLUiKkJK33HwCYsyQnUOOlKuMBzdE2dMakm7iQhGBe1emFu3cUuV0AIEC2rHgEoIScqKn9cEvenz/68sWVG/eUlBGCqkI1zic/OKR9chyvDyhm1V1aM//LbQAguCCto05glASC2pLVO8BiQkDp8Y27LTOmTZjGOQBYGWMWq4nS87oNIgZ1fv+cxX3//vrn+QUKY98WHx/z2odZL75zqtalUGqzmh8dO0A2BAABTOqi5d8JIeiF1Kstql8AQH7B0WPFZcSiahqndvP9N19rCGTYRxeiZZ4wCidfULvq769V1LkXPHL3iJ5drQq9ulP79x64Na1dbI+/vny4shoA7hiRERIdGvRraDXtLTxRWFza2iCWQgLA5ryD4NcURqQvkJqa0L1LOwCgF9yRCAmE4Pi5S+LCnS/eMeLDjdtDkMba7QlOx5xNudd2S3x0UL9h/56rcx7XNrzfVZ2h3q8qVHp9W/OLWhvEhpp37DkGlAAgBLTM9CRE5FxeeAgRhANllev3HZpx85A75i6O7tnBmhLrirYF4x3Tx46avzn/hm6JCqOf5O4SQmZe1QW4QEQAzN9zrLUAKCUA8kjJaWBUSgkIvbolAJzpcy+MxBBx5Q/7B6d1yT18/K+DrhMO05i587ftPTx+3se5rqoPxo5Zsavw3r69l+0qJAR7pLQDlXEuQKHFxyta1dQbju7za9W1XmBECAEqax8bYcgvz6d4oxUjBBdv37VwU67JZtl7qiI1PPy2zPRsaS+M0k0VInd30ZZy95bi4xEh1qKSsjfWbx2alIQWVecCKD1d7eGct3Yq4fMHfQENkAgpgVGH3QIAiC0BaCqJuZRSymFpKXO/26UAdI9u0zbc8XJF8b6AK9Sv1oHeJSGmX3JXVzB4RWS44GJMepoMcLNZ9fmDQLHeF/QHtNYCkACG8xieg+fzHl0IRsjG0pNHve4HOncFxPdPFm8IVtMTHhnr3Lt9x8krrENuuPKpyI5vlBd3iInK23kkq1vSxsLDA1KT4sKcJ8pqmmpvKaUQsrUATCozqQoIiYigC29DAM7tP4b031ZWjN64xtPQYKVKTdD/1KZ1MQnRUBbILjwAhNr3+18ZOOaN1TnTB2e+tW47DfJbMnpMWLisaOYzUspgUAsEdUAEIVWVqSpjraQgm8UU5rSWn6yiROVB/WR5jZHgfm4JXUgzpbmnK4Zlr/DommKx3LV5PQgR6XBsGDKCZzT0/tsriX2T/9k7Y3b2ls0HjwQ1PSOxQ7d20UNnvf/qXSPjwpwAUFnt1hsCzGrSuQhzWE2q0rpEJiQiJsRGgM4RCQhZcKAEfskEEsBM6fbTFcPXrqxr8L537Q3rs4ZTAKfJvGboqK720O4JsdnP/gn2V3y0JS8pPjrSbu+WELvjaMmNs95/8fbhD17fJ6DpEqDwUCn4g5QS0LlBGKx1AAQiSe0Sl73iOwAJCt22sxgACMXmpRuXEgFyKyuGr1tZ4/W+mjngwc4pALAia5hDUdMjonQpiYT+KYnfvPjkW2u3fplXsLukNKBpV3dqv2PG01dEhXMhGSEIsDW/qHEMyUWP5PiLA2AEjZQSEI3WigvJGI4a2OuVN1fqukCreefuo0dPnu4QHyWEaHrMxpSjHnfmqi/0YPDVzP4Tu3bXhUDEofEJBikxREAQQoZZLVNGZ00BmPL56imjsgwP50IQRCSk3udf/20hWFWdc6mya3onXmgik1LqXCAipYQxyighiIhoUpnPH9y5+wgxKUIIqtBAtefjFbl4ZqhmxIomRITJnBkdO/2azIld04xQpohcyuZTBkJQSqkLwYV44eahjFKdCyElJYQLCQCr/1NQdqScWUy6T4tqF9nnD4nnt4CUkgvJKGEUA0EtJ7ew6Ei502697uqUUId13tLN7y7cdOjAKbRbJIDgAm2mdxf9Z+LYLLNFbRa+3KGqG4aOQkPfZyrIn3eZiMia8CASimf+DgDw8txsoJQS1Bv8I27oZ7eZOReshXQjzoju8jQs+GLbOws2HthfAlyAkPa4iBCbuexQKVhUGmrjXBiPUIup9FDZv+ZlT3t0VFMRKgE0IbgUFAleQGfz4/ICkSAajeWnq7bnf7OfhoZoGkeL+vCd159zP2A4OqWEUKyocs1dnPPeJzknisvArBKnzbC4x+PzuBpopEMKwY1JCSUgQeicOm0vvb7ixoG9eiW313UBAA5FVQhR/kd1l6HEymr3pOc/JmYTIajV1Q8enn5lWiejGWS/KDoAHj9VNXvRpnlLt1SeqAKbmUY4pBCCN8YmMooAXOeIQBnlOud1XqAUQ8wSMFDvv3PC23tW/dNiVgnSDw4d2FJRxqW48P0FAeS6dlOHxCuj2ggp735idnlJNQ0LEbogZmXGpDFNXM2adRWSEAKA+4tPvT1/w8Kvct0VdRBiYZEOzgXX+U+7EABAkFzyOjcLMY8bnxXU9AULNpGwEBpiPlhw/O4J73aecLVQyJf794IUF5kmCXi98c7QPm2j75o0e3329zTCjgh6tfvpZ27u2TXhrLFKUwO1c8+RNz5cv/TrfH+tF+xWpjLOz9lPIQBKaTUpd96YMWHsgO7J7TVNT79xWsHuo9RplRKEqyGuZ/wLs+7pGBPp9voJQXJhFhBSSiGtZuUKc8jUKZ8s+jSHRTgAUa/1pvfpsm3ps4w28iAAoBACESur3ROnLVyyKl80BMBuZQptQfTG6GFUr3HPefPhB269vmkOVXSs/JqRz1fXNlCrCgDc4++dHD975vj09KSL9f6iA6fueer9vLyDLNwuEbnXFxMdmrt8akJslDFCbtQjF8Lj9fW7ZfqevCIS5UREwcV5aYIxqjcEIqIchza9ZLdZEIBSYpj1213FQ+6c6fYGWIiZSynr/YBw3+2ZTz80LKVTbOPUTQghxI9LPgSCRDkzLTxcUvn6vLVvz98oAjp1WBFA9zRERjrWL578h+T2xtTorOHuc698PuOFxab4yEBAu5AuTAIItw8JfDZ34phB6c1vNDB8V3DkpvGvlp6sZmEhjfm7rt4SETI6q9ftIzKu7pUYGe74+c01dd683Uc++zrv8zU73BV14LBRhSKAXu3u1CVu2bwnUpPif76tQU3X04ZNPbivBKyqaFH1lBIhpPT4gEDfjC7/+Mst/fukNLdmcwzHS6vGPfFezsYCcNqYygBA13Tw+ICSiJiwlMTYxA5tYqJCzSbFH9QqqtzFxyr2F5edLq0BnYPNrJgVCaD7guD1DR+R8cHL97eNcP7irgnrXN6UQX8rK6tFlf2i0yMCIYRzAR4fqGzQdamP3z9oyPU9mtYZ55psCilnzV710turXJUusFuYqhCCnAse0CGggc6h6XUIwCiYFGpSGCVcSN0fBK+/bbvIqU+M+vM9A5ru/AXxNE3vPmxq0f4SsPzUAkbxo2scPA3EZhqd1fOx8YMyr0o2Kn4hRUsbXymNFcDRk6f//f7qRcu215XXAqNgUanCGCU/yQlGucWDOviCwHnb9lH33XLtY+MHxUSFGsPjc+UQlFJOfvmzmdOXmOIjgwFNNhc9qIOnwRxmu214xqPjBvbufsXZye4iFpWnymu+WJO/fN2uHfuOu6s9ENQbjYuNXSkggKqEt3FkpHUcM7j3yEG9I8Ps511RNrKQ2+PLvG3Gnu8OQoSDEAIgRUCHer8jOvTe0dc8MnZAcqdYo/qXABc7zDNIvUmIssravQdPFhaXnSirrq6r13RuUllUaEiH+MiuibHdOsc1xTfnoonsWwJg5IHTNZ5J/1j0Vfb39V4fIMbGho+96ZqH7v5jQlxk85VJa2Ywxrj3vLnM+NqAXoDoP7pQUyYuKa06dLTCpLLU5HZOu/WSiH7OrujMDENCowsZnyNc7PcejRuaZrVQs0XVBSf/3/CctWIy/BUQjIYLfg8HL383ehnAZQCXAVwG8P8awH8BVeJy7fVOCIsAAAAASUVORK5CYII=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#005EB8; --navy:#003087; --bg:#F0F4F5; --surface:#FFFFFF; --text:#212B32;
+  --muted:#4C6272; --line:#D8DDE0; --yellow:#FFB81C; --green:#007F3B; --green-bg:#E3F2E9;
+  --blue-bg:#E6F0FA; --danger:#D5281B; --shadow:0 2px 0 #D8DDE0;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --blue:#5AA2EA; --navy:#9CC3EF; --bg:#0E1A24; --surface:#162533; --text:#E8EEF2;
+    --muted:#A3B6C3; --line:#2A3E4F; --green:#4CC17E; --green-bg:#143326; --blue-bg:#15314B;
+    --danger:#FF7468; --shadow:0 2px 0 #0A131B;
+  }
+}
+:root[data-theme="dark"]{
+  --blue:#5AA2EA; --navy:#9CC3EF; --bg:#0E1A24; --surface:#162533; --text:#E8EEF2;
+  --muted:#A3B6C3; --line:#2A3E4F; --green:#4CC17E; --green-bg:#143326; --blue-bg:#15314B;
+  --danger:#FF7468; --shadow:0 2px 0 #0A131B;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Figtree,"Frutiger","Helvetica Neue",Arial,sans-serif;font-size:1rem;line-height:1.5}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:2px}
+button,input,select,textarea{font:inherit;color:inherit}
+
+/* Header */
+.top{background:#005EB8;color:#fff}
+.top-inner{max-width:1240px;margin:0 auto;padding:.9rem 1.25rem;display:flex;flex-wrap:wrap;gap:.75rem 1.5rem;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:baseline;gap:.6rem;color:#fff;text-decoration:none}
+.brand b{font-size:1.25rem;font-weight:800;letter-spacing:-.01em}
+.brand span{opacity:.85;font-size:.95rem}
+.top nav{display:flex;flex-wrap:wrap;gap:.25rem}
+.top nav a{color:#fff;text-decoration:none;padding:.4rem .7rem;border-radius:4px;font-weight:600;font-size:.95rem}
+.top nav a:hover{background:rgba(255,255,255,.14)}
+.top nav a[aria-current="page"]{background:#fff;color:#003087}
+.support{background:#003087;color:#fff}
+.support-inner{max-width:1240px;margin:0 auto;padding:.5rem 1.25rem;display:flex;flex-wrap:wrap;gap:.25rem 1.25rem;align-items:center;font-size:.92rem}
+.support-inner strong{font-weight:600;opacity:.8;margin-right:.25rem}
+.support a{color:#fff;text-underline-offset:3px}
+.tools{position:relative}
+.tools summary{cursor:pointer;list-style:none;text-decoration:underline;text-underline-offset:3px;display:inline-flex;align-items:center;gap:.35rem}
+.tools summary::-webkit-details-marker{display:none}
+.tools summary::after{content:"";width:.45rem;height:.45rem;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .15s}
+.tools[open] summary::after{transform:translateY(2px) rotate(-135deg)}
+.tools .menu{position:absolute;z-index:20;top:calc(100% + .5rem);left:0;width:min(380px,calc(100vw - 2.5rem));max-height:70vh;overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 32px rgba(0,20,40,.25);padding:.4rem}
+.toollist{list-style:none;margin:0;padding:0}
+.toollist li{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.5rem .6rem;border-radius:4px}
+.toollist li+li{border-top:1px solid var(--line)}
+.toollist a{color:var(--blue);font-weight:600}
+.toollist .off{color:var(--muted)}
+.supportlist li{flex-direction:column;align-items:flex-start;gap:.1rem}
+.menu-desc{font-size:.85rem;color:var(--muted)}
+.support-inner{gap:.25rem 1.75rem}
+.tag{flex:none;font-size:.78rem;font-weight:700;padding:.1rem .5rem;border-radius:99px;white-space:nowrap}
+.tag.beta{background:var(--green-bg);color:var(--green)}
+.tag.alpha{background:var(--blue-bg);color:var(--navy)}
+.tag.dev{background:#FFF4DB;color:#6B4A00}
+.tag.idea{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.dev{background:#3A2E10;color:#FFD27A}}
+:root[data-theme="dark"] .tag.dev{background:#3A2E10;color:#FFD27A}
+.menu-note{font-size:.82rem;color:var(--muted);margin:.4rem .6rem .2rem}
+.xbtn{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border:2px solid transparent;border-radius:4px;background:transparent;color:var(--muted);cursor:pointer}
+.xbtn:hover{color:var(--danger);border-color:var(--danger);background:var(--surface)}
+.pulse-row{display:flex;flex-wrap:wrap;gap:.75rem 1rem;align-items:center}
+.pdsa-add{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:end}
+.pdsa{list-style:none;margin:.9rem 0 0;padding:0;display:grid;gap:.5rem;counter-reset:c}
+.pdsa li{counter-increment:c;display:grid;grid-template-columns:auto 1fr auto auto;gap:.75rem;align-items:center;padding:.55rem .8rem;border:1px solid var(--line);border-radius:4px}
+.pdsa li::before{content:"Cycle " counter(c);font-weight:700;color:var(--blue);font-size:.9rem}
+.pdsa .out{font-weight:700;font-size:.85rem;padding:.1rem .55rem;border-radius:99px}
+.out.Adopted{background:var(--green-bg);color:var(--green)}
+.out.Adapted{background:var(--blue-bg);color:var(--navy)}
+.out.Abandoned{background:var(--bg);color:var(--danger);border:1px solid var(--line)}
+@media (max-width:640px){.pdsa-add{grid-template-columns:1fr}.pdsa li{grid-template-columns:1fr auto}.pdsa li::before{grid-column:1/-1}}
+
+main{max-width:1240px;margin:0 auto;padding:1.5rem 1.25rem 4rem}
+.view[hidden]{display:none}
+
+/* Project header */
+.proj-head{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;justify-content:space-between;margin-bottom:1.25rem}
+.proj-head h1{margin:0;font-size:clamp(1.5rem,3vw,2rem);line-height:1.2;font-weight:800;letter-spacing:-.015em}
+.proj-head .meta{color:var(--muted);margin:.25rem 0 0}
+.pill{display:inline-block;font-size:.85rem;font-weight:600;padding:.15rem .6rem;border-radius:99px;background:var(--blue-bg);color:var(--navy)}
+.pill.done{background:var(--green-bg);color:var(--green)}
+
+/* FOCUS rail — the signature element */
+.rail{display:grid;grid-template-columns:repeat(6,1fr);background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:1.5rem;box-shadow:var(--shadow)}
+.rail button{all:unset;cursor:pointer;position:relative;padding:1rem .9rem .9rem;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.rail button:last-child{border-right:0}
+.rail button:focus-visible{outline:3px solid var(--yellow);outline-offset:-3px}
+.rail .letter{font-size:clamp(2rem,5vw,3.6rem);font-weight:800;line-height:.9;color:var(--line);letter-spacing:-.03em;transition:color .2s}
+.rail .name{font-weight:600;font-size:.92rem;line-height:1.25}
+.rail .state{font-size:.82rem;color:var(--muted)}
+.rail .done .letter{color:var(--green)}
+.rail .current .letter{color:var(--blue)}
+.rail .current{background:var(--blue-bg)}
+.rail button[aria-selected="true"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--yellow)}
+.rail button:hover .letter{color:var(--blue)}
+
+/* Layout */
+.work{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:1.5rem;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1.5rem;box-shadow:var(--shadow)}
+.panel h2{margin:0 0 .25rem;font-size:1.4rem;font-weight:700}
+.panel .intro{margin:0 0 1.5rem;color:var(--muted);max-width:62ch}
+.notice{background:var(--blue-bg);border-left:5px solid var(--blue);padding:.7rem 1rem;margin:0 0 1.5rem;border-radius:0 4px 4px 0}
+
+.field{margin-bottom:1.35rem}
+.field>label,.field>.lbl{display:block;font-weight:600;margin-bottom:.35rem}
+.hint{display:block;color:var(--muted);font-size:.9rem;font-weight:400;margin:-.2rem 0 .4rem}
+.req{color:var(--danger);font-weight:600}
+input[type=text],input[type=email],input[type=url],input[type=date],select,textarea{
+  width:100%;max-width:100%;padding:.55rem .7rem;border:2px solid var(--muted);border-radius:4px;background:var(--surface)}
+textarea{min-height:6rem;resize:vertical;line-height:1.45}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--text);box-shadow:0 0 0 3px var(--yellow)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 1.25rem}
+.seg{display:inline-flex;border:2px solid var(--muted);border-radius:4px;overflow:hidden}
+.seg label{display:block;cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;padding:.4rem 1.1rem;font-weight:600;border-right:1px solid var(--line)}
+.seg label:last-child span{border-right:0}
+.seg input:checked+span{background:var(--blue);color:#fff}
+.seg input:focus-visible+span{box-shadow:inset 0 0 0 3px var(--yellow)}
+.checks{display:flex;flex-wrap:wrap;gap:.5rem}
+.checks label{display:flex;align-items:center;gap:.45rem;border:2px solid var(--line);border-radius:4px;padding:.35rem .7rem;cursor:pointer}
+.checks input{width:1.15rem;height:1.15rem;accent-color:var(--blue)}
+.checks label:has(input:checked){border-color:var(--blue);background:var(--blue-bg)}
+fieldset{border:0;padding:0;margin:0}
+.group-title{font-size:1.05rem;font-weight:700;margin:2rem 0 1rem;padding-top:1.25rem;border-top:1px solid var(--line)}
+
+.log{list-style:none;margin:.75rem 0 0;padding:0;display:grid;gap:.6rem}
+.log li{display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;border-left:4px solid var(--blue);padding:.4rem .8rem;background:var(--bg);border-radius:0 4px 4px 0}
+.log time{display:block;font-size:.85rem;color:var(--muted);font-weight:600}
+
+.docs{margin-top:2rem;padding-top:1.25rem;border-top:1px solid var(--line)}
+.docs h3{margin:0 0 .5rem;font-size:1.05rem}
+.doclist{list-style:none;margin:.75rem 0 0;padding:0;display:grid;gap:.4rem}
+.doclist li{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.45rem .75rem;border:1px solid var(--line);border-radius:4px;font-size:.95rem}
+.doclist li span{overflow-wrap:anywhere}
+.empty{color:var(--muted);font-size:.95rem;margin:.5rem 0 0}
+
+.actions{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-top:2rem;padding-top:1.25rem;border-top:1px solid var(--line)}
+.btn{display:inline-flex;align-items:center;gap:.4rem;border:0;border-radius:4px;padding:.65rem 1.1rem;font-weight:700;cursor:pointer;background:var(--green);color:#fff;box-shadow:0 3px 0 #00401E;text-decoration:none}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #00401E}
+.btn.secondary{background:var(--surface);color:var(--blue);border:2px solid var(--blue);box-shadow:none;padding:.55rem 1rem}
+.btn.quiet{background:transparent;color:var(--blue);box-shadow:none;padding:.4rem .5rem;text-decoration:underline;text-underline-offset:3px}
+.btn.danger{color:var(--danger)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.saved{color:var(--muted);font-size:.9rem;margin-left:auto}
+
+/* Aside */
+aside .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1.1rem 1.2rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+aside h3{margin:0 0 .6rem;font-size:1rem}
+aside dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:.35rem .8rem;font-size:.93rem}
+aside dt{color:var(--muted)}
+aside dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.history{list-style:none;margin:0;padding:0;font-size:.92rem;display:grid;gap:.45rem}
+.history li{display:flex;justify-content:space-between;gap:.5rem}
+.history time{color:var(--muted)}
+.helplinks{list-style:none;margin:0;padding:0;display:grid;gap:.5rem;font-size:.95rem}
+
+/* Lists */
+.listhead{display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:flex-end;margin-bottom:1rem}
+.listhead h1{margin:0;font-size:clamp(1.5rem,3vw,2rem);font-weight:800;letter-spacing:-.015em}
+.listhead p{margin:.25rem 0 0;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:.6rem}
+.filters input,.filters select{width:auto;min-width:12rem}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.95rem}
+th,td{text-align:left;padding:.75rem 1rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:700;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td .t{font-weight:600}
+.mini{display:inline-flex;gap:2px;font-weight:800;font-size:1rem;letter-spacing:.02em}
+.mini b{color:var(--line)}
+.mini b.on{color:var(--green)}
+.mini b.cur{color:var(--blue)}
+
+/* Dialog */
+dialog{border:0;border-radius:8px;padding:0;width:min(640px,calc(100% - 2rem));max-height:calc(100% - 2rem);background:var(--surface);color:var(--text);box-shadow:0 20px 60px rgba(0,20,40,.35)}
+dialog::backdrop{background:rgba(0,30,60,.55)}
+.dlg-head{padding:1.25rem 1.5rem 1rem;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:1}
+.dlg-head h2{margin:0;font-size:1.3rem}
+.dlg-head p{margin:.25rem 0 0;color:var(--muted)}
+.dlg-body{padding:1.25rem 1.5rem}
+.dlg-body ol{list-style:none;margin:0;padding:0;counter-reset:q}
+.dlg-body li.q{counter-increment:q;display:grid;grid-template-columns:1.8rem 1fr;gap:.2rem .5rem;padding:.85rem 0;border-bottom:1px solid var(--line)}
+.dlg-body li.q::before{content:counter(q);font-weight:800;color:var(--blue)}
+.q .qtext{font-weight:600;margin-bottom:.45rem}
+.q .sub{font-size:.92rem;color:var(--muted);margin:0 0 .5rem;padding-left:1rem}
+.q .sub li{margin:.15rem 0}
+.dlg-foot{padding:1rem 1.5rem 1.25rem;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:.75rem;justify-content:flex-end;position:sticky;bottom:0;background:var(--surface)}
+.warn{color:var(--danger);font-weight:600;font-size:.92rem;margin:.75rem 0 0}
+
+.toast{position:fixed;left:50%;bottom:calc(1.25rem + env(safe-area-inset-bottom,0px));transform:translate(-50%,150%);background:var(--navy);color:var(--surface);padding:.7rem 1.1rem;border-radius:6px;font-weight:600;transition:transform .25s;z-index:10;max-width:calc(100% - 2rem)}
+.toast.show{transform:translate(-50%,0)}
+
+@media (max-width:960px){.work{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .grid2{grid-template-columns:1fr}
+  .rail .name,.rail .state{display:none}
+  .rail button{align-items:center;padding:.8rem .2rem}
+  .panel{padding:1.1rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top">
+    <div class="top-inner">
+      <a class="brand" href="#mine"><b>FOCUS</b><span>Improvement project tracker</span></a>
+      <nav aria-label="Main">
+        <a href="#mine" data-nav="mine">My projects</a>
+        <a href="#project" data-nav="project">Current project</a>
+        <a href="#repo" data-nav="repo">Project repository</a>
+        <a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=slTDN7CF9UeyIge0jXdO49aeA-DV7cxNn3HtO8zfVhdURFNZRkUyVUpBUUhTRjlOSE5JWlJNMlBXQS4u" target="_blank" rel="noopener">Feedback</a>
+      </nav>
+    </div>
+  </div>
+  <div class="support">
+    <div class="support-inner">
+      <details class="tools" id="supportMenu"><summary>Get support</summary><div class="menu"><ul class="toollist supportlist"><li><a href="https://m365.cloud.microsoft/chat/?titleId=T_9a8ef1bb-12ee-5134-a332-f2a26e2f1bd9&source=embedded-builder" target="_blank" rel="noopener">QI Coach chatbot</a><span class="menu-desc">Talk through your idea or next step</span></li><li><a href="https://nhs.sharepoint.com/:u:/r/sites/msteams_de9171/SitePages/Coaching,-Mentoring-%26-QI-Clinics.aspx?d=w388a701be9e940038a5ed1ab42b9b192&amp;csf=1&amp;web=1&amp;e=6gO0oF" target="_blank" rel="noopener">Book a QI Clinic</a><span class="menu-desc">One-to-one time with an improvement advisor</span></li><li><a href="https://coh.gstt.nhs.uk/course/view.php?id=3199" target="_blank" rel="noopener">Book training</a><span class="menu-desc">QI courses from the CITI Academy</span></li><li><a href="https://teams.microsoft.com/l/channel/19%3AtqDE8DYvOERF7Q7JAJyW4WuaJFD6AmLJ07wypT9dVks1%40thread.tacv2/Improvement%20Community%20Hub?groupId=1bf22369-4401-488f-8994-68e3d2340c12&amp;tenantId=37c354b2-85b0-47f5-b222-07b48d774ee3" target="_blank" rel="noopener">Ask the Improvement Community</a><span class="menu-desc">Post a question in the Teams hub</span></li></ul></div></details>
+      <details class="tools" id="toolsMenu"><summary>QI charting tools</summary><div class="menu"><ul class="toollist" id="toolsList"></ul><p class="menu-note">Tools still in development or ideation are listed so you know what is coming.</p></div></details>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Project view -->
+  <section class="view" id="view-project" hidden aria-labelledby="projTitle">
+    <div class="proj-head">
+      <div>
+        <h1 id="projTitle">Untitled project</h1>
+        <p class="meta" id="projMeta"></p>
+      </div>
+      <span class="pill" id="projStatus"></span>
+    </div>
+
+    <div class="rail" role="tablist" aria-label="FOCUS lifecycle stages" id="rail"></div>
+
+    <div class="work">
+      <div class="panel" id="panel"></div>
+      <aside id="aside"></aside>
+    </div>
+  </section>
+
+  <!-- My projects -->
+  <section class="view" id="view-mine" aria-labelledby="mineTitle">
+    <div class="listhead">
+      <div><h1 id="mineTitle">My projects</h1><p>Projects where you are the submitter or project lead.</p></div>
+      <a class="btn" href="#new">Start a new project</a>
+    </div>
+    <div class="tablewrap"><table id="mineTable"></table></div>
+  </section>
+
+  <!-- Repository -->
+  <section class="view" id="view-repo" hidden aria-labelledby="repoTitle">
+    <div class="listhead">
+      <div><h1 id="repoTitle">Project repository</h1><p>Every improvement project registered across the Trust.</p></div>
+      <div class="filters">
+        <label class="visually-hidden" for="repoSearch" style="position:absolute;left:-9999px">Search projects</label>
+        <input type="text" id="repoSearch" placeholder="Search by title, lead or team">
+        <label for="repoStage" style="position:absolute;left:-9999px">Filter by stage</label>
+        <select id="repoStage"><option value="">All stages</option></select>
+      </div>
+    </div>
+    <div class="tablewrap"><table id="repoTable"></table></div>
+  </section>
+</main>
+
+
+<dialog id="dlg" aria-labelledby="dlgTitle"></dialog>
+<input type="file" id="fileInput" multiple hidden>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const LINKS = {
+  chatbot:"https://m365.cloud.microsoft/chat/?titleId=T_9a8ef1bb-12ee-5134-a332-f2a26e2f1bd9&source=embedded-builder",
+  priorities:"https://intranet.gstt.nhs.uk/clinical-services/how-we-keep-patients-safe-and-improve-our-care/our-improvement-priorities/",
+  girft:"https://gettingitrightfirsttime.co.uk/",
+  modelHospital:"https://model.nhs.uk/"
+};
+
+const TOOLS = [
+ {n:"Driver diagram",url:"https://github.com/PerrinShanks-Cogito/ImprovementTools/tree/main/driver_diagram",s:"Ready for beta",c:"beta"},
+ {n:"Pareto chart",url:"https://paretochartbuilder.netlify.app/",s:"Beta, published",c:"beta"},
+ {n:"Run chart",url:"https://runchartbuilder.netlify.app/",s:"Beta, published",c:"beta"},
+ {n:"SPC tool",url:"https://spc-tool.netlify.app/",s:"Alpha, published",c:"alpha"},
+ {n:"Scatter plot",s:"In development",c:"dev"},
+ {n:"Bar chart",s:"In development",c:"dev"},
+ {n:"Fishbone",s:"In ideation",c:"idea"},
+ {n:"A3 poster generator",s:"In ideation",c:"idea"},
+ {n:"Histogram",s:"In ideation",c:"idea"},
+ {n:"PDSA snapshot generator",s:"In ideation",c:"idea"},
+ {n:"Regression analysis tool",s:"In ideation",c:"idea"},
+ {n:"Three factor test design matrix",s:"In ideation",c:"idea"},
+ {n:"Highlight report",s:"In ideation",c:"idea"}
+];
+const toolItem = t => `<li>${t.url?`<a href="${t.url}" target="_blank" rel="noopener">${t.n}</a>`:`<span class="off">${t.n}</span>`}<span class="tag ${t.c}">${t.s}</span></li>`;
+
+const OPTS = {
+  group:["Cancer and Surgery","Evelina London Children's","Integrated and Specialist Medicine","Heart, Lung and Critical Care","Diagnostics and Pharmacy","Essentia","Finance","People","Digital Services","Corporate Nursing","Other corporate team"],
+  domain:["Safe","Effective","Patient-centred","Timely","Efficient","Equitable"],
+  submission:["Improvement idea","QI project","Part of a QI programme","QI fellowship or training project","Other"],
+  profession:["Nursing and midwifery","Medical and dental","Allied health professional","Healthcare scientist","Pharmacy","Administrative and clerical","Estates and facilities","Management","Other"],
+  sites:["St Thomas'","Guy's","Royal Brompton","Harefield","Evelina"],
+  status:["Completed","Closed, not progressed","On hold","Merged with another project"],
+  scalable:["Yes","No","Not sure"],
+  realised:["Yes","Partially","No","Too early to tell"],
+  pdsaOutcome:["Adopted","Adapted","Abandoned"]
+};
+
+const STAGES = [
+ {id:"find",letter:"F",name:"Find the opportunity",
+  intro:"Tell us what you want to improve, why it matters and who is involved.",
+  fields:[
+   {k:"title",t:"text",l:"Project title",req:true},
+   {k:"description",t:"textarea",l:"Briefly describe the project"},
+   {k:"expectedBenefits",t:"textarea",l:"Expected benefits",hint:"What will be better if this works, and for whom?"},
+   {row:[{k:"group",t:"select",l:"Clinical group / corporate team",o:"group"},{k:"domain",t:"select",l:"Quality domain",o:"domain"}]},
+   {k:"submissionType",t:"select",l:"Submission type",o:"submission"},
+   {h:"People"},
+   {k:"submitter",t:"text",l:"Your name",hint:"The person submitting this project."},
+   {row:[{k:"leadName",t:"text",l:"Project lead name"},{k:"leadEmail",t:"email",l:"Project lead email"}]},
+   {k:"profession",t:"select",l:"Project lead professional group",o:"profession"},
+   {row:[{k:"sponsor",t:"text",l:"Line manager / sponsor"},{k:"coach",t:"text",l:"Project coach / advisor"}]},
+   {k:"collaborators",t:"textarea",l:"QI collaborators",hint:"Anyone else working on the project with you. Add names and teams, one per line."},
+   {k:"sponsorSupport",t:"yesno",l:"Does your line manager / sponsor support the project?"},
+   {h:"Where"},
+   {k:"sites",t:"checks",l:"Project sites",o:"sites"}
+  ],
+  checklist:[
+   {k:"ckClear",q:"Are you clear on what you are trying to accomplish?"},
+   {k:"ckChatbot",q:"Have you run your opportunity by our QI Coach chatbot?",links:[["Open the QI Coach chatbot",LINKS.chatbot]]},
+   {k:"ckTools",q:"Have you checked out our QI tools section?",note:"Fishbone diagrams can be useful in analysing root causes."},
+   {k:"ckAligned",q:"Is your project aligned with strategic goals like these?",links:[["Our improvement priorities (intranet)",LINKS.priorities],["Getting It Right First Time (GIRFT)",LINKS.girft],["NHS England Model Hospital",LINKS.modelHospital]]}
+  ]},
+ {id:"observe",letter:"O",name:"Observe the current state",
+  intro:"Understand what is happening now and how you will know whether things have improved.",
+  fields:[
+   {k:"measuring",t:"textarea",l:"Document how you are measuring your improvement"},
+   {k:"evidence",t:"textarea",l:"Supporting evidence or rationale"},
+   {k:"currentState",t:"textarea",l:"What is the current state?"},
+   {k:"baseline",t:"textarea",l:"What are your baseline measures?"}
+  ],
+  docsLabel:"Upload supporting documents",
+  checklist:[
+   {k:"ckRca",q:"Have you developed a full understanding of the current state using root cause analysis techniques?"},
+   {k:"ckBaseline",q:"Have you established a baseline measurement?"},
+   {k:"ckTeam",q:"Have you briefed your project team?",note:"If it is only you, just mark yes."},
+   {k:"ckStakeholders",q:"Have you engaged with customer side stakeholders?"}
+  ]},
+ {id:"create",letter:"C",name:"Create the plan",
+  intro:"Set a clear aim and decide which changes you will test first.",
+  fields:[
+   {k:"smartAim",t:"yesno",l:"Do you have a SMART aim?",hint:"Specific, measurable, achievable, relevant and time-bound."},
+   {k:"planOnPage",t:"yesno",l:"Have you created a Plan on a Page?"},
+   {k:"solutions",t:"yesno",l:"Do you have a list of solutions to test?"}
+  ],
+  checklist:[
+   {k:"smartAim",q:"Do you have a SMART aim?"},
+   {k:"planOnPage",q:"Have you created a Plan on a Page?"},
+   {k:"solutions",q:"Do you have a list of solutions to test?"}
+  ]},
+ {id:"undertake",letter:"U",name:"Undertake the plan",
+  intro:"Test your changes, record what happens and keep a log of progress.",
+  fields:[
+   {k:"updates",t:"log",l:"Progress updates"},
+   {k:"pdsaCount",t:"number",l:"Number of completed PDSA cycles"},
+   {k:"pdsa",t:"pdsa",l:"PDSA cycles",hint:"List what each cycle changed and whether you adopted, adapted or abandoned the change."},
+   {k:"loggedImprovements",t:"yesno",l:"Have you logged the improvements you have undertaken?"}
+  ],
+  checklist:[{k:"loggedImprovements",q:"Have you logged the improvements you have undertaken?"}]},
+ {id:"sustain",letter:"S",name:"Sustain the benefit",
+  intro:"Make sure the improvement holds once the project team steps back.",
+  fields:[
+   {k:"sustainPlan",t:"yesno",l:"Have you created a sustainability plan?"},
+   {k:"bau",t:"yesno",l:"Has the change been established in business as usual?"}
+  ],
+  checklist:[
+   {k:"sustainPlan",q:"Have you created a sustainability plan?"},
+   {k:"bau",q:"Has the change been established in business as usual?"}
+  ]},
+ {id:"close",letter:"✓",name:"Close",
+  intro:"Record the outcome and share what you learned so others can build on it.",
+  fields:[
+   {row:[{k:"status",t:"select",l:"Project status",o:"status"},{k:"completionDate",t:"date",l:"Completion date"}]},
+   {k:"realised",t:"radio3",l:"Did this project realise its expected benefits?",o:"realised"},
+   {k:"learning",t:"textarea",l:"Key learning from your project"},
+   {k:"poster",t:"url",l:"Link to poster",hint:"Paste a SharePoint or web link."},
+   {k:"scalable",t:"radio3",l:"Is this idea scalable?",o:"scalable"},
+   {k:"pulse",t:"pulse",l:"Project promoted to Pulse"}
+  ]}
+];
+
+/* ---------- State ---------- */
+const today = () => new Date().toISOString().slice(0,10);
+const uid = () => Math.random().toString(36).slice(2,9);
+const ME = "Perrin";
+
+function blankProject(){
+  return {id:uid(),owner:ME,stage:0,closed:false,created:today(),history:[{stage:0,date:today()}],
+    data:{submitter:ME,sites:[],updates:[]},docs:{}};
+}
+const SAMPLES = [
+ {id:"s1",owner:ME,stage:3,closed:false,created:"2026-03-02",
+  history:[{stage:0,date:"2026-03-02"},{stage:1,date:"2026-04-10"},{stage:2,date:"2026-06-01"},{stage:3,date:"2026-07-14"}],
+  data:{title:"Reducing discharge delays on Florence Ward",description:"Testing a criteria-led discharge checklist to cut afternoon discharges.",expectedBenefits:"More patients home before midday, freeing beds for ED admissions.",collaborators:"Ward pharmacist\nDischarge coordinator",group:"Integrated and Specialist Medicine",domain:"Timely",submitter:ME,leadName:"Amara Okafor",leadEmail:"amara.okafor@gstt.nhs.uk",sponsor:"Dan Hughes",sponsorSupport:"Yes",coach:"CITI improvement advisor",submissionType:"QI project",profession:"Nursing and midwifery",sites:["St Thomas'"],smartAim:"Yes",planOnPage:"Yes",solutions:"Yes",
+   pdsaCount:"2",pdsa:[{change:"Criteria-led discharge checklist used at morning board round",outcome:"Adapted"},{change:"Pharmacy TTO prompt added at the 10am huddle",outcome:"Adopted"}],
+   updates:[{date:"2026-08-20",text:"PDSA 1 complete: checklist used on 18 of 24 discharges. Feedback gathered from nurse in charge."},{date:"2026-09-17",text:"PDSA 2 started with pharmacy TTO prompt added at 10am huddle."}]},docs:{observe:["Baseline discharge times.xlsx","Fishbone - discharge delays.pdf"]}},
+ {id:"s2",owner:ME,stage:1,closed:false,created:"2026-08-11",history:[{stage:0,date:"2026-08-11"},{stage:1,date:"2026-09-05"}],
+  data:{title:"Improving outpatient letter turnaround",expectedBenefits:"Patients and GPs receive clinic letters within 7 days.",group:"Cancer and Surgery",domain:"Timely",submitter:ME,leadName:ME,sites:["Guy's"],updates:[]},docs:{}},
+ {id:"s3",owner:"Others",stage:5,closed:true,created:"2025-10-01",history:[{stage:0,date:"2025-10-01"},{stage:5,date:"2026-07-30"}],
+  data:{title:"Safer insulin prescribing in paediatrics",expectedBenefits:"Fewer insulin prescribing errors on paediatric wards.",realised:"Yes",group:"Evelina London Children's",domain:"Safe",leadName:"Priya Shah",sites:["Evelina"],status:"Completed",updates:[]},docs:{}},
+ {id:"s4",owner:"Others",stage:2,closed:false,created:"2026-05-19",history:[{stage:0,date:"2026-05-19"},{stage:2,date:"2026-08-08"}],
+  data:{title:"Cutting theatre start delays at Harefield",expectedBenefits:"First cases start on time, adding theatre capacity.",group:"Heart, Lung and Critical Care",domain:"Efficient",leadName:"Tom Reid",sites:["Harefield"],updates:[]},docs:{}},
+ {id:"s5",owner:"Others",stage:4,closed:false,created:"2025-12-02",history:[{stage:0,date:"2025-12-02"},{stage:4,date:"2026-09-01"}],
+  data:{title:"Reducing agency spend through e-rostering",expectedBenefits:"Lower agency spend and more stable rosters.",group:"People",domain:"Efficient",leadName:"Grace Mensah",sites:["Guy's","St Thomas'"],updates:[]},docs:{}},
+ {id:"s6",owner:"Others",stage:0,closed:false,created:"2026-09-22",history:[{stage:0,date:"2026-09-22"}],
+  data:{title:"Greener inhaler switching at Royal Brompton",expectedBenefits:"Lower carbon footprint from inhaler prescribing.",group:"Heart, Lung and Critical Care",domain:"Effective",leadName:"Lewis Carter",sites:["Royal Brompton"],updates:[]},docs:{}}
+];
+
+const KEY="focus-mock-v2";
+let S;
+try{ S = JSON.parse(localStorage.getItem(KEY)); }catch(e){ S=null; }
+if(!S || !Array.isArray(S.projects)){
+  const p = blankProject();
+  S = {projects:[p,...structuredClone(SAMPLES)],current:p.id};
+}
+let viewStage = cur().stage;
+
+function cur(){ return S.projects.find(p=>p.id===S.current) || S.projects[0]; }
+let saveTimer;
+function save(){
+  try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){}
+  const el=document.getElementById("savedNote"); if(el){ el.textContent="Saved "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}); }
+}
+function saveSoon(){ clearTimeout(saveTimer); saveTimer=setTimeout(save,400); }
+
+/* ---------- Helpers ---------- */
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = d => d ? new Date(d+"T00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}) : "";
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2600); }
+function stageLabel(p){ return p.closed ? "Closed" : STAGES[p.stage].name; }
+
+/* ---------- Field rendering ---------- */
+function fieldHTML(f,d){
+  if(f.h) return `<h3 class="group-title">${esc(f.h)}</h3>`;
+  if(f.row) return `<div class="grid2">${f.row.map(x=>fieldHTML(x,d)).join("")}</div>`;
+  const id="f_"+f.k, v=d[f.k];
+  const lab=`${esc(f.l)}${f.req?' <span class="req" aria-hidden="true">*</span>':''}`;
+  const hint=f.hint?`<span class="hint" id="${id}_h">${esc(f.hint)}</span>`:"";
+  const desc=f.hint?` aria-describedby="${id}_h"`:"";
+  switch(f.t){
+    case "text": case "email": case "url": case "date":
+      return `<div class="field"><label for="${id}">${lab}</label>${hint}<input type="${f.t}" id="${id}" data-k="${f.k}" value="${esc(v)}"${desc}${f.req?" required":""}></div>`;
+    case "textarea":
+      return `<div class="field"><label for="${id}">${lab}</label>${hint}<textarea id="${id}" data-k="${f.k}"${desc}>${esc(v)}</textarea></div>`;
+    case "select":
+      return `<div class="field"><label for="${id}">${lab}</label>${hint}<select id="${id}" data-k="${f.k}"${desc}><option value="">Select an option</option>${OPTS[f.o].map(o=>`<option${o===v?" selected":""}>${esc(o)}</option>`).join("")}</select></div>`;
+    case "yesno": case "radio3":
+      const opts = f.t==="yesno"?["Yes","No"]:OPTS[f.o];
+      return `<fieldset class="field"><legend class="lbl" style="font-weight:600;margin-bottom:.35rem">${lab}</legend>${hint}<div class="seg">${opts.map(o=>`<label><input type="radio" name="${id}" data-k="${f.k}" value="${o}"${v===o?" checked":""}><span>${o}</span></label>`).join("")}</div></fieldset>`;
+    case "checks":
+      const arr=v||[];
+      return `<fieldset class="field"><legend class="lbl" style="font-weight:600;margin-bottom:.35rem">${lab}</legend><div class="checks">${OPTS[f.o].map(o=>`<label><input type="checkbox" data-k="${f.k}" value="${esc(o)}"${arr.includes(o)?" checked":""}>${esc(o)}</label>`).join("")}</div></fieldset>`;
+    case "pulse":
+      return `<fieldset class="field"><legend class="lbl" style="font-weight:600;margin-bottom:.35rem">${lab}</legend>${hint}
+        <div class="pulse-row"><div class="seg">${["Yes","No"].map(o=>`<label><input type="radio" name="${id}" data-k="${f.k}" value="${o}"${v===o?" checked":""}><span>${o}</span></label>`).join("")}</div>
+        <button type="button" class="btn secondary" data-act="exportPulse">Export project for upload to Pulse</button></div></fieldset>`;
+    case "number":
+      return `<div class="field"><label for="${id}">${lab}</label>${hint}<input type="number" min="0" step="1" inputmode="numeric" id="${id}" data-k="${f.k}" value="${esc(v)}" style="max-width:8rem"${desc}></div>`;
+    case "pdsa":{
+      const cyc=v||[];
+      return `<fieldset class="field"><legend class="lbl" style="font-weight:600;margin-bottom:.35rem">${lab}</legend>${hint}
+        <div class="pdsa-add"><div><label for="pdsaChange" class="hint" style="margin:0 0 .3rem">What did this cycle change?</label><input type="text" id="pdsaChange" placeholder="For example: added a pharmacy prompt at the 10am huddle"></div>
+        <div><span class="hint" style="margin:0 0 .3rem">Outcome</span><div class="seg" role="radiogroup" aria-label="Outcome">${OPTS.pdsaOutcome.map((o,i)=>`<label><input type="radio" name="pdsaOut" value="${o}"${i===0?" checked":""}><span>${o.replace("ed","")}</span></label>`).join("")}</div></div></div>
+        <div style="margin-top:.6rem"><button type="button" class="btn secondary" data-act="addPdsa">Add PDSA cycle</button></div>
+        ${cyc.length?`<ol class="pdsa">${cyc.map((c,i)=>`<li><span>${esc(c.change)}</span><span class="out ${c.outcome}">${c.outcome}</span><button type="button" class="xbtn" data-act="rmPdsa" data-i="${i}" aria-label="Delete cycle ${i+1}" title="Delete cycle"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></li>`).join("")}</ol>`:`<p class="empty">No PDSA cycles listed yet.</p>`}</fieldset>`;}
+    case "log":
+      const list=(v||[]).map((u,i)=>({...u,i})).reverse();
+      return `<div class="field"><label for="${id}">${lab}</label><span class="hint">Add a dated note each time you test a change or reach a milestone.</span>
+        <textarea id="${id}" placeholder="What did you test, what happened, what will you do next?"></textarea>
+        <div style="margin-top:.6rem"><button type="button" class="btn secondary" data-act="addUpdate">Add update</button></div>
+        ${list.length?`<ul class="log">${list.map(u=>`<li><div><time>${fmt(u.date)}</time>${esc(u.text)}</div><button type="button" class="xbtn" data-act="rmUpdate" data-i="${u.i}" aria-label="Delete update from ${fmt(u.date)}" title="Delete update"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></li>`).join("")}</ul>`:`<p class="empty">No updates yet. Your first update will appear here.</p>`}</div>`;
+  }
+}
+
+/* ---------- Render: project ---------- */
+function renderProject(){
+  const p=cur(), d=p.data;
+  document.getElementById("projTitle").textContent = d.title || "Untitled project";
+  document.getElementById("projMeta").textContent = [d.leadName&&("Led by "+d.leadName), d.group, "Started "+fmt(p.created)].filter(Boolean).join(", ");
+  const st=document.getElementById("projStatus");
+  st.textContent = p.closed ? "Closed" : "Current stage: "+STAGES[p.stage].name;
+  st.className = "pill"+(p.closed?" done":"");
+
+  document.getElementById("rail").innerHTML = STAGES.map((s,i)=>{
+    const done = p.closed || i<p.stage, current = !p.closed && i===p.stage;
+    const stTxt = done?"Complete":current?"In progress":"Not started";
+    return `<button role="tab" id="tab_${s.id}" aria-controls="panel" aria-selected="${i===viewStage}" class="${done?"done":current?"current":""}" data-stage="${i}">
+      <span class="letter" aria-hidden="true">${s.letter}</span><span class="name">${s.name}</span><span class="state">${stTxt}</span>
+      <span style="position:absolute;left:-9999px">${s.name}, ${stTxt}</span></button>`;
+  }).join("");
+
+  const s=STAGES[viewStage];
+  const isCurrent = !p.closed && viewStage===p.stage;
+  let notice="";
+  if(p.closed) notice=`<p class="notice">This project is closed. You can still view and update the record.</p>`;
+  else if(viewStage>p.stage) notice=`<p class="notice">This project is at <strong>${STAGES[p.stage].name}</strong>. You can start filling this stage in early.</p>`;
+  else if(viewStage<p.stage) notice=`<p class="notice">This stage is complete. Changes here update the project record.</p>`;
+
+  const docs=p.docs[s.id]||[];
+  let action="";
+  if(s.id==="close"){
+    action = p.closed
+      ? `<button type="button" class="btn secondary" data-act="reopen">Reopen project</button>`
+      : `<button type="button" class="btn" data-act="closeProject">Close project</button>`;
+  } else if(isCurrent){
+    action = `<button type="button" class="btn" data-act="checklist">Ready to move on</button>`;
+  }
+
+  document.getElementById("panel").setAttribute("aria-labelledby","tab_"+s.id);
+  document.getElementById("panel").innerHTML = `
+    <h2>${s.name}</h2><p class="intro">${s.intro}</p>${notice}
+    <form id="stageForm" onsubmit="return false" novalidate>${s.fields.map(f=>fieldHTML(f,p.data)).join("")}</form>
+    <div class="docs"><h3>${s.docsLabel||"Documents"}</h3>
+      <button type="button" class="btn secondary" data-act="addDocs">Add documents</button>
+      ${docs.length?`<ul class="doclist">${docs.map((n,i)=>`<li><span>${esc(n)}</span><button type="button" class="btn quiet danger" data-act="rmDoc" data-i="${i}" aria-label="Remove ${esc(n)}">Remove</button></li>`).join("")}</ul>`:`<p class="empty">No documents added to this stage yet.</p>`}
+    </div>
+    <div class="actions">${action}<span class="saved" id="savedNote">Changes save automatically</span></div>`;
+
+  renderAside();
+}
+
+function renderAside(){
+  const p=cur(), d=p.data;
+  const docCount=Object.values(p.docs).reduce((a,b)=>a+b.length,0);
+  document.getElementById("aside").innerHTML = `
+   <div class="card"><h3>Project summary</h3><dl>
+     <dt>Lead</dt><dd>${esc(d.leadName||"Not set")}</dd>
+     <dt>Sponsor</dt><dd>${esc(d.sponsor||"Not set")}</dd>
+     <dt>Sites</dt><dd>${esc((d.sites||[]).join(", ")||"Not set")}</dd>
+     <dt>Domain</dt><dd>${esc(d.domain||"Not set")}</dd>
+     <dt>Documents</dt><dd>${docCount}</dd></dl></div>
+   <div class="card"><h3>Lifecycle history</h3><ul class="history">${p.history.slice().reverse().map(h=>`<li><span>${STAGES[h.stage].name}</span><time>${fmt(h.date)}</time></li>`).join("")}</ul></div>
+   <div class="card"><h3>Need a hand?</h3><ul class="helplinks">
+     <li><a href="${LINKS.chatbot}" target="_blank" rel="noopener">Ask the QI Coach chatbot</a></li>
+     <li><a href="https://nhs.sharepoint.com/:u:/r/sites/msteams_de9171/SitePages/Coaching,-Mentoring-%26-QI-Clinics.aspx?d=w388a701be9e940038a5ed1ab42b9b192&amp;csf=1&amp;web=1&amp;e=6gO0oF" target="_blank" rel="noopener">Book a QI Clinic</a></li>
+
+     <li><a href="https://coh.gstt.nhs.uk/course/view.php?id=3199" target="_blank" rel="noopener">Book training with the CITI Academy</a></li>
+     <li><a href="https://teams.microsoft.com/l/channel/19%3AtqDE8DYvOERF7Q7JAJyW4WuaJFD6AmLJ07wypT9dVks1%40thread.tacv2/Improvement%20Community%20Hub?groupId=1bf22369-4401-488f-8994-68e3d2340c12&amp;tenantId=37c354b2-85b0-47f5-b222-07b48d774ee3" target="_blank" rel="noopener">Ask a question in the Improvement Community Hub</a></li></ul></div>
+   <div class="card"><h3>QI charting tools</h3><ul class="toollist">${TOOLS.filter(t=>t.url).map(toolItem).join("")}</ul></div>`;
+}
+
+/* ---------- Checklist dialog ---------- */
+const dlg=document.getElementById("dlg");
+function openChecklist(){
+  const p=cur(), s=STAGES[p.stage], next=Math.min(p.stage+1,STAGES.length-1);
+  const yn=(k)=>`<div class="seg">${["Yes","No"].map(o=>`<label><input type="radio" name="c_${k}" data-ck="${k}" value="${o}"${p.data[k]===o?" checked":""}><span>${o}</span></label>`).join("")}</div>`;
+  dlg.innerHTML = `
+   <div class="dlg-head"><h2 id="dlgTitle">Ready to move on from ${s.name}?</h2><p>Check you have covered the essentials before moving to the next FOCUS stage.</p></div>
+   <div class="dlg-body"><ol>
+     ${s.checklist.map(c=>`<li class="q"><div><div class="qtext">${esc(c.q)}</div>
+       ${c.note?`<p class="sub" style="padding-left:0">${esc(c.note)}</p>`:""}
+       ${c.links?`<ul class="sub">${c.links.map(([t,u])=>`<li><a href="${u}" target="_blank" rel="noopener">${esc(t)}</a></li>`).join("")}</ul>`:""}
+       ${yn(c.k)}</div></li>`).join("")}
+     <li class="q"><div><div class="qtext">Ready to move to the next stage?</div>${yn("ckReady_"+s.id)}</div></li>
+     <li class="q"><div><label class="qtext" for="ckDate" style="display:block">Date of lifecycle change</label><input type="date" id="ckDate" value="${today()}"></div></li>
+     <li class="q"><div><label class="qtext" for="ckStage" style="display:block">New lifecycle stage</label>
+       <select id="ckStage">${STAGES.map((x,i)=>`<option value="${i}"${i===next?" selected":""}>${x.name}</option>`).join("")}</select></div></li>
+   </ol><p class="warn" id="ckWarn" hidden></p></div>
+   <div class="dlg-foot"><button type="button" class="btn secondary" data-act="dlgCancel">Not yet</button><button type="button" class="btn" data-act="dlgConfirm">Move to ${STAGES[next].name}</button></div>`;
+  dlg.showModal();
+}
+dlg.addEventListener("change",e=>{
+  const p=cur();
+  if(e.target.dataset.ck){ p.data[e.target.dataset.ck]=e.target.value; saveSoon(); }
+  if(e.target.id==="ckStage") dlg.querySelector('[data-act="dlgConfirm"]').textContent="Move to "+STAGES[+e.target.value].name;
+});
+dlg.addEventListener("click",e=>{
+  const a=e.target.closest("[data-act]")?.dataset.act;
+  if(e.target===dlg || a==="dlgCancel"){ dlg.close(); return; }
+  if(a==="dlgConfirm"){
+    const p=cur(), s=STAGES[p.stage], warn=dlg.querySelector("#ckWarn");
+    const target=+dlg.querySelector("#ckStage").value, date=dlg.querySelector("#ckDate").value;
+    let msg="";
+    if(p.data["ckReady_"+s.id]!=="Yes") msg="Answer yes to \u201cReady to move to the next stage?\u201d to continue.";
+    else if(!date) msg="Enter the date of the lifecycle change.";
+    else if(target===p.stage) msg="Choose a different lifecycle stage.";
+    else if(s.id==="find" && !p.data.title) msg="Add a project title before moving on.";
+    if(msg){ warn.textContent=msg; warn.hidden=false; return; }
+    p.stage=target; p.history.push({stage:target,date}); viewStage=target;
+    save(); dlg.close(); renderProject(); toast("Moved to "+STAGES[target].name);
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+});
+
+/* ---------- Panel events ---------- */
+const panel=document.getElementById("panel");
+function onField(e){
+  const el=e.target, k=el.dataset.k; if(!k) return;
+  const p=cur();
+  if(el.type==="checkbox"){
+    p.data[k]=[...panel.querySelectorAll(`input[data-k="${k}"]:checked`)].map(i=>i.value);
+  } else p.data[k]=el.value;
+  if(k==="title"||k==="leadName"||k==="group"){ document.getElementById("projTitle").textContent=p.data.title||"Untitled project";
+    document.getElementById("projMeta").textContent=[p.data.leadName&&("Led by "+p.data.leadName),p.data.group,"Started "+fmt(p.created)].filter(Boolean).join(", "); }
+  saveSoon(); if(e.type==="change") renderAside();
+}
+panel.addEventListener("input",onField);
+panel.addEventListener("change",onField);
+
+const fileInput=document.getElementById("fileInput");
+fileInput.addEventListener("change",()=>{
+  const p=cur(), sid=STAGES[viewStage].id;
+  p.docs[sid]=(p.docs[sid]||[]).concat([...fileInput.files].map(f=>f.name));
+  const n=fileInput.files.length; fileInput.value="";
+  save(); renderProject(); toast(n+" document"+(n>1?"s":"")+" added");
+});
+
+panel.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]"); if(!b) return;
+  const p=cur(), sid=STAGES[viewStage].id;
+  switch(b.dataset.act){
+    case "addDocs": fileInput.click(); break;
+    case "rmDoc": p.docs[sid].splice(+b.dataset.i,1); save(); renderProject(); toast("Document removed"); break;
+    case "checklist": openChecklist(); break;
+    case "addUpdate":{
+      const ta=document.getElementById("f_updates"), txt=ta.value.trim();
+      if(!txt){ ta.focus(); toast("Write your update first"); return; }
+      (p.data.updates=p.data.updates||[]).push({date:today(),text:txt}); save(); renderProject(); toast("Update added"); break;}
+    case "addPdsa":{
+      const inp=document.getElementById("pdsaChange"), txt=inp.value.trim();
+      if(!txt){ inp.focus(); toast("Describe what the cycle changed first"); return; }
+      const out=panel.querySelector('input[name="pdsaOut"]:checked').value;
+      (p.data.pdsa=p.data.pdsa||[]).push({change:txt,outcome:out});
+      if(!p.data.pdsaCount || +p.data.pdsaCount<p.data.pdsa.length) p.data.pdsaCount=String(p.data.pdsa.length);
+      save(); renderProject(); toast("PDSA cycle added"); break;}
+    case "exportPulse": exportPulse(p); break;
+    case "rmUpdate": p.data.updates.splice(+b.dataset.i,1); save(); renderProject(); toast("Update deleted"); break;
+    case "rmPdsa": p.data.pdsa.splice(+b.dataset.i,1); save(); renderProject(); toast("PDSA cycle deleted"); break;
+    case "closeProject":
+      if(!p.data.status||!p.data.completionDate){ toast("Add a project status and completion date to close"); return; }
+      p.closed=true; p.stage=5; p.history.push({stage:5,date:p.data.completionDate}); save(); renderProject(); toast("Project closed"); break;
+    case "reopen": p.closed=false; save(); renderProject(); toast("Project reopened"); break;
+  }
+});
+
+document.getElementById("rail").addEventListener("click",e=>{
+  const b=e.target.closest("[data-stage]"); if(!b) return;
+  viewStage=+b.dataset.stage; renderProject(); document.getElementById("tab_"+STAGES[viewStage].id).focus();
+});
+document.getElementById("rail").addEventListener("keydown",e=>{
+  if(!["ArrowLeft","ArrowRight"].includes(e.key)) return;
+  viewStage=(viewStage+(e.key==="ArrowRight"?1:-1)+STAGES.length)%STAGES.length;
+  renderProject(); document.getElementById("tab_"+STAGES[viewStage].id).focus();
+});
+
+/* ---------- Export for Pulse ---------- */
+function pulseCSV(p){
+  const d=p.data, v=x=>Array.isArray(x)?x.join("; "):(x??"");
+  const cols=[["Project ID",p.id],["Project title",d.title],["Description",d.description],["Expected benefits",d.expectedBenefits],
+    ["Clinical group / corporate team",d.group],["Quality domain",d.domain],["Submission type",d.submissionType],["Submitter",d.submitter],
+    ["Project lead",d.leadName],["Project lead email",d.leadEmail],["Project lead professional group",d.profession],
+    ["Line manager / sponsor",d.sponsor],["Sponsor support",d.sponsorSupport],["Project coach / advisor",d.coach],["QI collaborators",(d.collaborators||"").replace(/\n+/g,"; ")],
+    ["Project sites",d.sites],["Lifecycle stage",stageLabel(p)],["Start date",p.created],
+    ["Lifecycle history",p.history.map(h=>STAGES[h.stage].name+" ("+h.date+")")],
+    ["How improvement is measured",d.measuring],["Supporting evidence",d.evidence],["Current state",d.currentState],["Baseline measures",d.baseline],
+    ["SMART aim",d.smartAim],["Plan on a Page",d.planOnPage],["Solutions to test",d.solutions],
+    ["Completed PDSA cycles",d.pdsaCount],["PDSA cycles",(d.pdsa||[]).map((c,i)=>"Cycle "+(i+1)+": "+c.change+" ("+c.outcome+")")],
+    ["Progress updates",(d.updates||[]).map(u=>u.date+": "+u.text)],["Improvements logged",d.loggedImprovements],
+    ["Sustainability plan",d.sustainPlan],["Established in business as usual",d.bau],
+    ["Project status",d.status],["Completion date",d.completionDate],["Expected benefits realised",d.realised],["Key learning",d.learning],
+    ["Poster link",d.poster],["Scalable",d.scalable],["Promoted to Pulse",d.pulse],
+    ["Documents",Object.entries(p.docs).flatMap(([st,fs])=>fs.map(f=>st+": "+f))]];
+  const q=x=>'"'+String(v(x)).replace(/"/g,'""')+'"';
+  return "\uFEFF"+cols.map(c=>q(c[0])).join(",")+"\r\n"+cols.map(c=>q(c[1])).join(",")+"\r\n";
+}
+async function exportPulse(p){
+  const csv=pulseCSV(p);
+  const name=((p.data.title||"project").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"-").slice(0,60)||"project")+"-pulse-export.csv";
+  let dl=null; try{ dl = window.claude?.use ? await window.claude.use("downloads") : null; }catch(e){}
+  if(dl){
+    try{ await dl.save({filename:name,data:csv}); toast("Export saved: "+name); }
+    catch(err){ toast(err?.code==="declined"?"Export cancelled":"Export isn't available here, try again shortly"); }
+    return;
+  }
+  try{ await navigator.clipboard.writeText(csv); toast("Download not available here, so the export was copied to your clipboard"); }
+  catch(e){ toast("Export isn't available in this view"); }
+}
+
+/* ---------- Lists ---------- */
+function miniRail(p){
+  return `<span class="mini" aria-label="${esc(stageLabel(p))}">${STAGES.map((s,i)=>`<b class="${p.closed||i<p.stage?"on":(i===p.stage?"cur":"")}">${s.letter}</b>`).join("")}</span>`;
+}
+function rows(list,mine){
+  if(!list.length) return mine
+    ? `<tbody><tr><td><p class="empty">You have no projects yet. Use Start a new project to log your first one.</p></td></tr></tbody>`
+    : `<tbody><tr><td colspan="6"><p class="empty">No projects match. Try a different search or stage.</p></td></tr></tbody>`;
+  return `<thead><tr><th>Project</th><th>Lifecycle</th><th>Stage</th><th>Team</th><th>Sites</th><th>${mine?"Last change":"Lead"}</th>${mine?'<th><span style="position:absolute;left:-9999px">Actions</span></th>':""}</tr></thead><tbody>${
+    list.map(p=>{const d=p.data,last=p.history[p.history.length-1];
+      return `<tr><td><a class="t" href="#project" data-open="${p.id}">${esc(d.title||"Untitled project")}</a><div class="hint" style="margin:0">${esc((d.expectedBenefits||"").slice(0,90))}</div></td>
+      <td>${miniRail(p)}</td><td>${esc(stageLabel(p))}</td><td>${esc(d.group||"")}</td><td>${esc((d.sites||[]).join(", "))}</td>
+      <td>${mine?fmt(last.date):esc(d.leadName||"")}</td>${mine?`<td style="text-align:right"><button type="button" class="xbtn" data-del="${p.id}" aria-label="Delete ${esc(d.title||"Untitled project")}" title="Delete project"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></td>`:""}</tr>`}).join("")}</tbody>`;
+}
+function renderMine(){ document.getElementById("mineTable").innerHTML=rows(S.projects.filter(p=>p.owner===ME),true); }
+function renderRepo(){
+  const q=document.getElementById("repoSearch").value.toLowerCase(), st=document.getElementById("repoStage").value;
+  const list=S.projects.filter(p=>{
+    const hay=[p.data.title,p.data.leadName,p.data.group].join(" ").toLowerCase();
+    const sv=p.closed?"closed":String(p.stage);
+    return (!q||hay.includes(q)) && (!st||st===sv);
+  });
+  document.getElementById("repoTable").innerHTML=rows(list,false);
+}
+document.getElementById("repoStage").innerHTML+=STAGES.slice(0,5).map((s,i)=>`<option value="${i}">${s.name}</option>`).join("")+`<option value="closed">Closed</option>`;
+document.getElementById("repoSearch").addEventListener("input",renderRepo);
+document.getElementById("repoStage").addEventListener("change",renderRepo);
+document.addEventListener("click",e=>{
+  const o=e.target.closest("[data-open]");
+  if(o){ S.current=o.dataset.open; viewStage=cur().closed?5:cur().stage; save(); }
+  const ph=e.target.closest("[data-placeholder]");
+  if(ph){ e.preventDefault(); toast("Mock link: this will open the "+ph.dataset.placeholder); }
+});
+
+/* ---------- Delete project ---------- */
+function confirmDelete(id){
+  const p=S.projects.find(x=>x.id===id); if(!p) return;
+  const title=p.data.title||"Untitled project";
+  dlg.innerHTML=`<div class="dlg-head"><h2 id="dlgTitle">Delete this project?</h2></div>
+    <div class="dlg-body"><p style="margin:0 0 .5rem"><strong>${esc(title)}</strong></p>
+    <p style="margin:0;color:var(--muted)">This removes the project, its stage history, PDSA cycles, updates and documents from the tracker. It can't be undone.</p></div>
+    <div class="dlg-foot"><button type="button" class="btn secondary" data-act="dlgCancel">Keep project</button><button type="button" class="btn" style="background:var(--danger);box-shadow:none" data-act="dlgDelete" data-id="${id}">Delete project</button></div>`;
+  dlg.showModal();
+  dlg.querySelector('[data-act="dlgCancel"]').focus();
+}
+dlg.addEventListener("click",e=>{
+  const b=e.target.closest('[data-act="dlgDelete"]'); if(!b) return;
+  const id=b.dataset.id, t=S.projects.find(x=>x.id===id)?.data.title||"Untitled project";
+  S.projects=S.projects.filter(x=>x.id!==id);
+  if(S.current===id){
+    const next=S.projects.find(x=>x.owner===ME)||S.projects[0];
+    if(next) S.current=next.id; else { const n=blankProject(); S.projects.push(n); S.current=n.id; }
+    viewStage=cur().closed?5:cur().stage;
+  }
+  save(); dlg.close(); renderMine(); toast("Deleted: "+t);
+});
+document.getElementById("mineTable").addEventListener("click",e=>{
+  const b=e.target.closest("[data-del]"); if(b) confirmDelete(b.dataset.del);
+});
+
+/* ---------- Routing ---------- */
+function route(){
+  let h=(location.hash||"#mine").slice(1);
+  if(h==="new"){
+    const p=blankProject(); S.projects.unshift(p); S.current=p.id; viewStage=0; save();
+    history.replaceState(null,"","#project"); h="project"; toast("New project started");
+  }
+  if(!["project","mine","repo"].includes(h)) h="mine";
+  document.querySelectorAll(".view").forEach(v=>v.hidden=v.id!=="view-"+h);
+  document.querySelectorAll("[data-nav]").forEach(a=>a.toggleAttribute("aria-current",a.dataset.nav===h) || a.removeAttribute("aria-current"));
+  document.querySelectorAll("[data-nav]").forEach(a=>{ if(a.dataset.nav===h) a.setAttribute("aria-current","page"); });
+  if(h==="project") renderProject(); if(h==="mine") renderMine(); if(h==="repo") renderRepo();
+  window.scrollTo(0,0);
+}
+document.getElementById("toolsList").innerHTML=TOOLS.map(toolItem).join("");
+const menus=[...document.querySelectorAll("details.tools")];
+menus.forEach(m=>m.addEventListener("toggle",()=>{ if(m.open) menus.forEach(o=>{ if(o!==m) o.open=false; }); }));
+document.addEventListener("click",e=>{ menus.forEach(m=>{ if(m.open && !m.contains(e.target)) m.open=false; }); });
+document.addEventListener("keydown",e=>{ if(e.key!=="Escape") return; const m=menus.find(x=>x.open); if(m){ m.open=false; m.querySelector("summary").focus(); } });
+window.addEventListener("hashchange",route);
+route();
+</script>
+</body>
+</html>
