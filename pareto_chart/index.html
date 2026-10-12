@@ -86,6 +86,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* Workspace */
 main{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:1.25rem;padding:0 1.25rem 1.25rem;align-items:start}
 @media (max-width:880px){main{grid-template-columns:1fr}}
+main>*{min-width:0}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:1.1rem}
 .panel h2{font-size:1.05rem;font-weight:700;margin:0 0 .75rem}
 .panel h2+.block{margin-top:0}
