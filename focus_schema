@@ -110,7 +110,7 @@ CREATE TABLE focus.project (
                                 ('Yes','Partially','No','Too early to tell')),
     beneficiaries           VARCHAR(10)         NULL CHECK (beneficiaries IN ('Patients','Staff','Mixed')),
     people_affected_per_year VARCHAR(15)        NULL CHECK (people_affected_per_year IN
-                                ('< 100','100 - 999','1000 - 9999','10000 +')),
+                                ('Less than 100','100 - 999','1000 - 9999','10000 +')),
     key_learning            NVARCHAR(MAX)       NULL,
     poster_url              NVARCHAR(1000)      NULL,
     is_scalable             VARCHAR(10)         NULL CHECK (is_scalable IN ('Yes','No','Not sure')),
