@@ -328,6 +328,8 @@ const OPTS = {
   status:["Completed","Closed, not progressed","On hold","Merged with another project"],
   scalable:["Yes","No","Not sure"],
   realised:["Yes","Partially","No","Too early to tell"],
+  beneficiaries:["Patients","Staff","Mixed"],
+  reach:["< 100","100 - 999","1000 - 9999","10000 +"],
   pdsaOutcome:["Adopted","Adapted","Abandoned"]
 };
 
@@ -407,6 +409,8 @@ const STAGES = [
   fields:[
    {row:[{k:"status",t:"select",l:"Project status",o:"status"},{k:"completionDate",t:"date",l:"Completion date"}]},
    {k:"realised",t:"radio3",l:"Did this project realise its expected benefits?",o:"realised"},
+   {k:"beneficiaries",t:"radio3",l:"Who benefits from the project?",o:"beneficiaries"},
+   {k:"reach",t:"radio3",l:"How many people does this affect per year?",o:"reach"},
    {k:"learning",t:"textarea",l:"Key learning from your project"},
    {k:"poster",t:"url",l:"Link to poster",hint:"Paste a SharePoint or web link."},
    {k:"scalable",t:"radio3",l:"Is this idea scalable?",o:"scalable"},
@@ -482,7 +486,7 @@ function fieldHTML(f,d){
       return `<div class="field"><label for="${id}">${lab}</label>${hint}<select id="${id}" data-k="${f.k}"${desc}><option value="">Select an option</option>${OPTS[f.o].map(o=>`<option${o===v?" selected":""}>${esc(o)}</option>`).join("")}</select></div>`;
     case "yesno": case "radio3":
       const opts = f.t==="yesno"?["Yes","No"]:OPTS[f.o];
-      return `<fieldset class="field"><legend class="lbl" style="font-weight:600;margin-bottom:.35rem">${lab}</legend>${hint}<div class="seg">${opts.map(o=>`<label><input type="radio" name="${id}" data-k="${f.k}" value="${o}"${v===o?" checked":""}><span>${o}</span></label>`).join("")}</div></fieldset>`;
+      return `<fieldset class="field"><legend class="lbl" style="font-weight:600;margin-bottom:.35rem">${lab}</legend>${hint}<div class="seg">${opts.map(o=>`<label><input type="radio" name="${id}" data-k="${f.k}" value="${esc(o)}"${v===o?" checked":""}><span>${esc(o)}</span></label>`).join("")}</div></fieldset>`;
     case "checks":
       const arr=v||[];
       return `<fieldset class="field"><legend class="lbl" style="font-weight:600;margin-bottom:.35rem">${lab}</legend><div class="checks">${OPTS[f.o].map(o=>`<label><input type="checkbox" data-k="${f.k}" value="${esc(o)}"${arr.includes(o)?" checked":""}>${esc(o)}</label>`).join("")}</div></fieldset>`;
@@ -693,7 +697,7 @@ function pulseCSV(p){
     ["Completed PDSA cycles",d.pdsaCount],["PDSA cycles",(d.pdsa||[]).map((c,i)=>"Cycle "+(i+1)+": "+c.change+" ("+c.outcome+")")],
     ["Progress updates",(d.updates||[]).map(u=>u.date+": "+u.text)],["Improvements logged",d.loggedImprovements],
     ["Sustainability plan",d.sustainPlan],["Established in business as usual",d.bau],
-    ["Project status",d.status],["Completion date",d.completionDate],["Expected benefits realised",d.realised],["Key learning",d.learning],
+    ["Project status",d.status],["Completion date",d.completionDate],["Expected benefits realised",d.realised],["Who benefits",d.beneficiaries],["People affected per year",d.reach],["Key learning",d.learning],
     ["Poster link",d.poster],["Scalable",d.scalable],["Promoted to Pulse",d.pulse],
     ["Documents",Object.entries(p.docs).flatMap(([st,fs])=>fs.map(f=>st+": "+f))]];
   const q=x=>'"'+String(v(x)).replace(/"/g,'""')+'"';
