@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- © Guy’s and St Thomas’ NHS Foundation Trust 2026. All rights reserved. -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
@@ -238,6 +239,8 @@ select.field{overflow:visible;cursor:pointer}
 .empty-map .actions{justify-content:center;margin-top:1rem}
 .sw.dash{background:transparent!important;border:2px dashed #6A4C93;height:0;border-radius:0}
 @media (max-width:480px){.scope-grid{grid-template-columns:1fr}.row2{grid-template-columns:1fr}}
+.site-footer{flex:none;max-width:1200px;margin:0 auto;padding:1rem 1rem 1.5rem;color:var(--muted);font-size:.85rem;text-align:center}
+.site-footer p{margin:0}
 </style>
 </head>
 <body>
@@ -1134,5 +1137,6 @@ renderAll();
 if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>renderCanvas());
 })();
 </script>
+<footer class="site-footer"><p>© Guy’s and St Thomas’ NHS Foundation Trust 2026. All rights reserved.</p></footer>
 </body>
 </html>
