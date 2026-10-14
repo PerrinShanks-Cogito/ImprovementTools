@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- © Guy’s and St Thomas’ NHS Foundation Trust 2026. All rights reserved. -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
@@ -175,6 +176,8 @@ td button{font-size:12px;padding:2px 8px}
 .privacy{display:flex;align-items:center;gap:8px;font-size:14px}
 .privacy svg{flex:none}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.site-footer{flex:none;max-width:1200px;margin:0 auto;padding:1rem 1rem 1.5rem;color:var(--muted);font-size:.85rem;text-align:center}
+.site-footer p{margin:0}
 </style>
 </head>
 <body>
@@ -913,5 +916,6 @@ document.addEventListener("keydown", e => { if (e.key !== "Escape") return; cons
 readData(); renderAll();
 })();
 </script>
+<footer class="site-footer"><p>© Guy’s and St Thomas’ NHS Foundation Trust 2026. All rights reserved.</p></footer>
 </body>
 </html>
